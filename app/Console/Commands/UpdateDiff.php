@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use DB;
-use App\Modules\Exchanges\Models\NgoaiTe;
+use App\Models\NgoaiTe;
 use App\Helpers\checkSymBol;
 class UpdateDiff extends Command
 {

@@ -1,7 +1,7 @@
 <?php
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
-use App\Modules\Exchanges\Models\XangDau;
+use App\Models\XangDau;
 use App\Helpers\SimpleHtmlDom;
 class getOilPetro extends Command
 {
@@ -33,12 +33,6 @@ class getOilPetro extends Command
      */
     public function handle()
     {
-        stream_context_set_default([
-           'ssl' => [
-               'verify_peer' => false,
-               'verify_peer_name' => false,
-           ]
-        ]);
         $SimpleHTMLDOM = new SimpleHtmlDom();
         $url = "https://www.petrolimex.com.vn/";
         try{

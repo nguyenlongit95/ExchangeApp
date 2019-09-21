@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Modules\Exchanges\Models\TienAo;
-use App\Modules\Exchanges\Models\LoaiTienAo;
+use App\Models\TienAo;
+use App\Models\LoaiTienAo;
 class getVirtualMoney extends Command
 {
     /**

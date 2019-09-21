@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 use DB;
 use App\Helpers\SimpleHtmlDom;
 use Carbon\Carbon;
-use App\Modules\Exchanges\Models\LaiSuat;
+use App\Models\LaiSuat;
 use App\Helpers\ChangeText;
 class getInterestRate extends Command
 {
@@ -44,39 +44,39 @@ class getInterestRate extends Command
     {
         $SimpleHTMLDOM = new SimpleHtmlDom();
         $changeText = new ChangeText();
-//        $urlVCB = "https://www.vietcombank.com.vn/InterestRates/";
-//        try{
-//            $htmlVCB = $SimpleHTMLDOM->file_get_html($urlVCB);
-//        }catch(\Exception $e){
-//            $htmlVCB = null;
-//        }
-//        $this->vietcombank($htmlVCB);
-//
-//        $urlVTB = "https://www.vietinbank.vn/web/home/vn/lai-suat";
-//        try{
-//            $htmlVTB = $SimpleHTMLDOM->file_get_html($urlVTB);
-//        }catch(\Exception $e){
-//            $htmlVTB = null;
-//        }
-//        $this->vtb($htmlVTB);
-//
-//       $urlSHB = "https://www.shb.com.vn/category/lien-ket-nhanh/lai-suat-tiet-kiem/";
-//       try{
-//           $htmlSHB = $SimpleHTMLDOM->file_get_html($urlSHB);
-//       }catch(\Exception $e){
-//           $htmlSHB = null;
-//       }
-//
-//        $this->shb($SimpleHTMLDOM);
-//        $this->bidv();
-//
-//        $urlDONGA = "http://kinhdoanh.dongabank.com.vn/widget/temp/-/DTSCDongaBankIView_WAR_DTSCDongaBankIERateportlet?type=tktt-vnd";
-//        try{
-//            $htmlDONGA = $SimpleHTMLDOM->file_get_html($urlDONGA);
-//        }catch(\Exception $e){
-//            $htmlDONGA = null;
-//        }
-//        $this->donga($htmlDONGA);
+        $urlVCB = "https://www.vietcombank.com.vn/InterestRates/";
+        try{
+            $htmlVCB = $SimpleHTMLDOM->file_get_html($urlVCB);
+        }catch(\Exception $e){
+            $htmlVCB = null;
+        }
+        $this->vietcombank($htmlVCB);
+
+        $urlVTB = "https://www.vietinbank.vn/web/home/vn/lai-suat";
+        try{
+            $htmlVTB = $SimpleHTMLDOM->file_get_html($urlVTB);
+        }catch(\Exception $e){
+            $htmlVTB = null;
+        }
+        $this->vtb($htmlVTB);
+
+       $urlSHB = "https://www.shb.com.vn/category/lien-ket-nhanh/lai-suat-tiet-kiem/";
+       try{
+           $htmlSHB = $SimpleHTMLDOM->file_get_html($urlSHB);
+       }catch(\Exception $e){
+           $htmlSHB = null;
+       }
+
+        $this->shb($SimpleHTMLDOM);
+        $this->bidv();
+
+        $urlDONGA = "http://kinhdoanh.dongabank.com.vn/widget/temp/-/DTSCDongaBankIView_WAR_DTSCDongaBankIERateportlet?type=tktt-vnd";
+        try{
+            $htmlDONGA = $SimpleHTMLDOM->file_get_html($urlDONGA);
+        }catch(\Exception $e){
+            $htmlDONGA = null;
+        }
+        $this->donga($htmlDONGA);
 
         $url = "http://oceanbank.vn/lai-suat.html";
         try{
@@ -357,44 +357,37 @@ class getInterestRate extends Command
 
         if($html) {
             $changeText = new ChangeText();
-            $table = $html->find('div#tabs1 ul.list_ls li div.ct_lstk table',0);
-                $ar = array();
-                for ($j = 62; $j < 63; $j ++) {
-                    $i = $j;
+            $table = $html->find('div#tabs1 ul.list_ls li div.ct_lstk table');
+
+            for ($i = 0; $i < 1; $i++) {
+
+                for ($j = 2; $j < 63; $j += 3) {
                     $LaiSuat = new LaiSuat();
                     $LaiSuat->bank_id = 11;
                     $LaiSuat->bank_code = 'ocean';
                     $LaiSuat->bank_name = 'OceanBank';
                     $LaiSuat->hinhthuctietkiem = 1;
-                    $kyhan = strip_tags($this->changeTxtOCB($table->find('tr td', $j)));
-                    if ($kyhan && $kyhan != ""){
-                        $LaiSuat->kyhan = $kyhan->innertext;
-                        $kyhanslug = html_entity_decode(str_replace('-ngay','',str_replace('-thang','',$changeText->changeTitle(strip_tags($this->changeTxtOCB($table->find('tr td', $j)->innertext))))));
-                        if($kyhanslug === "tgtt-tkkkh"){
-                            $kyhanslug = 0;
-                        }
-                        $LaiSuat->kyhanslug = $kyhanslug;
+                    $LaiSuat->kyhan = strip_tags($this->changeTxtOCB($table[$i]->find('tr td', $j - 2)->innertext));
+                    $kyhanslug = html_entity_decode(str_replace('-ngay','',str_replace('-thang','',$changeText->changeTitle(strip_tags($this->changeTxtOCB($table[$i]->find('tr td', $j - 2)->innertext))))));
+                    if($kyhanslug === "tgtt-tkkkh"){
+                        $kyhanslug = 0;
                     }
+                    $LaiSuat->kyhanslug = $kyhanslug;
                     $LaiSuat->moctiengui = null;
                     $LaiSuat->moctienguisau = null;
-                    $laisuat_vnd = floatval(str_replace(',', '.', strip_tags($table->find('tr td', $i+1))));
-                    if ($laisuat_vnd && $laisuat_vnd != ''){
-                        $LaiSuat->laisuat_vnd = $laisuat_vnd ->innertext;
-                    }
-//                    $LaiSuat->laisuat_usd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j)->innertext)));
+                    $LaiSuat->laisuat_vnd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j - 1)->innertext)));
+                    $LaiSuat->laisuat_usd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j)->innertext)));
                     $LaiSuat->laisuat_eur = null;
                     $LaiSuat->laisuattratruoc = null;
                     $LaiSuat->laisuathangthang = null;
-                    if (isset($LaiSuat->kyhan) && isset($LaiSuat->kyhanslug) ){
-                        $LaiSuat->save();
-                    }
+                    $LaiSuat->save();
                 }
 
             }
         }
-
+    }
     protected function changeTxtOCB($txt){
-        return str_replace('ng&agrave;y','ngày',str_replace('v&agrave;','&',$txt));
+        return str_replace('th&aacute;ng','tháng',str_replace('v&agrave;','&',$txt));
     }
 
 //    protected function mbbank($html){

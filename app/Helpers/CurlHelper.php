@@ -2,9 +2,6 @@
 
 namespace App\Helpers;
 use App\Modules\ServerStorage\Models\StorageServer;
-use App\Modules\Filehost\Models\user_ftp;
-use Crypt;
-
 class CurlHelper
 {
 
@@ -41,33 +38,37 @@ class CurlHelper
     }
 
     /**
-     * Get all ServerStorage information and status
-     * Timeout 5 seconds
-     * @return False or JSON Object
-     */
+     * Tại đây sẽ khai báo các phương thức làm việc với API
+     * Sử dụng cURL để cấu hình và gọi đến các API
+     * Có 2 tham số truyền vào mặc định đó là
+     *  $url: là đường link dẫn tới máy chủ
+     *  $apikey: là khóa an toàn để xác thực thông tin
+     * */
+
+    /**
+     * Lấy ra thông tin của tất cả các máy chủ lưu trữ
+     * Tham số đầu vào là đường dẫn tới API cung cấp thông tin toàn bộ máy chủ
+     * Ngoài ra cần 1 tham số là apikey để xác thực máy chủ
+     * Lấy ra những máy chủ ít dung lượng nhất và có tỷ lệ sử dụng ít nhất
+     * */
     public function getAllSystemInfo($url,$apikey){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'api-key:'.$apikey
         ));
         $result = curl_exec($ch);
         curl_close($ch);
-        if($result == false){
-            return false;
-        }else{
-            return $result;
-        }
+
+        return $result;
     }
     /**
-     * Create a new User FTP
-     *
-     * @return json
-     */
+     * Tạo mới tài khoản FTP
+     * Tham số đầu vào gồm: tên tài khoản và mật khẩu
+     * */
     public function createFTPUser($url, $username, $password, $apiKey){
         $data = array('username'=>$username,'password'=>$password);
         $data_json = json_encode($data);
@@ -109,10 +110,9 @@ class CurlHelper
     }
 
     /**
-     * Update a password User FTP
-     *
-     * @return json
-     */
+     * Reset FTP Password
+     * Tham số đầu vào là username, password (new)
+     * */
     public function updateFTPPassword($url, $username, $newPassword, $apikey){
         $data = array('username'=>$username,'password'=>$newPassword);
         $data_json = json_encode($data);
@@ -132,10 +132,9 @@ class CurlHelper
         return $result;
     }
     /**
-     * Delete a user FTP
-     *
-     * @return json
-     */
+     * Xóa 1 FTP file
+     * tham số đầu vào là tên tài khoản
+     * */
     public function deleteFTPUser($url, $username,$apikey){
         $data = array('username'=>$username);
         $data_json = json_encode($data);
@@ -156,10 +155,9 @@ class CurlHelper
         return $result;
     }
     /**
-     * Decrypt a file to download.
-     *
-     * @return json
-     */
+     * Mã hóa file gửi lên
+     * Tham số đầu vào là tên của file và tên người dùng
+     * */
     public function DecryptFile($username,$fileName,$url,$apikey){
         $data = array('username'=>$username, 'filename'=>$fileName);
         $data_json = json_encode($data);
@@ -180,10 +178,9 @@ class CurlHelper
         return $result;
     }
     /**
-     * Delete a Decrypt File
-     *
-     * @return json
-     */
+     * Xóa 1 file đã được mã hóa
+     * Tham số đầu vào là tên file và tên người dùng
+     * */
     public function DeleteDecryptFile($username,$fileName,$url,$apikey){
         $data = array('username'=>$username, 'filename'=>$fileName);
         $data_json = json_encode($data);
@@ -204,10 +201,9 @@ class CurlHelper
         return $result;
     }
     /**
-     * Delete a file in the storage
-     *
-     * @return json
-     */
+     * Xóa 1 file đã được giải mã
+     * Tham số đầu vào là tên file và tên người dùng
+     * */
     public function DeleteEncryptFile($username,$fileName,$url,$apikey){
         $data = array('username'=>$username, 'filename'=>$fileName);
         $data_json = json_encode($data);
@@ -228,10 +224,9 @@ class CurlHelper
         return $result;
     }
     /**
-     * Upload file form URL
-     * Param: a url the file
-     * @return json
-     */
+     * Upload file bằng 1 url
+     * Nhập đường dẫn URL của file sau đó up lên server
+     * */
     public function UploadFileFormUrl($username,$url,$urlFIle,$apikey){
         $data = array('url'=>$urlFIle);
         $data_json = json_encode($data);
@@ -254,15 +249,12 @@ class CurlHelper
     }
 
     /**
-     * Get min Storage
-     *
-     * @return array
-     */
+     * Thuật toán để lấy ra storage được sử dụng ít nhất
+     * Xử lý mảng 2 chiều
+     * Nếu lệch thuật toán thì sửa lại tại dòng if(){}
+     * */
     public function getMinStorage(){
         $arrayData = $this->getSystemInfo();
-        if($arrayData === "errors"){
-            return "errors";
-        }
         $i=0;
         for($i; $i <= count($arrayData);$i++){
             if($arrayData[$i]["mount"] > $arrayData[$i++]["mount"]){
@@ -273,32 +265,30 @@ class CurlHelper
         }
     }
     /**
-     * Get System information
-     *
-     * @return array
-     */
+     * Phương thức lấy ra thông tin của máy chủ
+     * Truy vấn dữ liệu trong CSDL
+     * Lấy ra thông tin
+     * Gọi đến phương thức getAllSystemInfo và truyền tham số
+     * Nhận đc dữ liệu trả về và gán vào 1 mảng
+     * Lấy ra tỷ lệ sử dụng thấp nhất của storage tính theo số người dùng
+     * Gán vào mảng và trả về mảng đó để hàm khác sẽ phân tích
+     * */
     public function getSystemInfo(){
         $storage = StorageServer::all();
+        $apikey = "hanv#123";
         $arrayStorage = array();
-
-        for($i=0; $i < count($storage); $i++){
-
-            $data = json_decode($this->getAllSystemInfo($storage[$i]['url'], $storage[$i]['api_key']));
-            if($data == null){
-                continue;
-            }
+        $i = 0;
+        foreach($storage as $key=>$value){
+            $data = json_decode($this->getAllSystemInfo($value->url, $apikey));
             $total_mem = $data->mem->total;
-
             $free_mem = $data->mem->free;
-
             $mount = ($free_mem / $total_mem) * 100;
-
             $new_array = array($i,"model"=>$data->model,"mount" => $mount);
-
             $arrayStorage[] = $new_array;
-
+            $i++;
         }
         return $arrayStorage;
     }
+
 
 }

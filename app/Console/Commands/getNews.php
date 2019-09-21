@@ -10,7 +10,7 @@ use App\Helpers\ChangeText;
 
 use App\Helpers\SimpleHtmlDom;
 use DB;
-use App\Modules\Seo\Models\Seo;
+use App\Seo;
 
 class getNews extends Command
 {

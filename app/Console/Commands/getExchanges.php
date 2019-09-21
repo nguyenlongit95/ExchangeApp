@@ -4,13 +4,11 @@ use Illuminate\Console\Command;
 use DB;
 use Carbon\Carbon;
 use App\Helpers\SimpleHtmlDom;
-use App\Modules\Exchanges\Models\NgoaiTe;
-use App\Modules\Currency\Models\CurrencyCode;
-use App\Modules\Exchanges\Models\NgoaiTeCron;
+use App\Models\NgoaiTe;
+use App\Models\CurrencyCode;
+use App\Models\NgoaiTeCron;
 
 use App\Modules\Api\Controllers\ApiFrontController;
-use phpDocumentor\Reflection\DocBlock\DescriptionFactory;
-use App\Modules\Exchanges\Models\BankInfo;
 
 class getExchanges extends Command
 {
@@ -51,10 +49,7 @@ class getExchanges extends Command
         if($NgoaiTeCron == null){
             $NgoaiTeCron = 1;
         }
-        //Brgin call function
-        /**
-         *Ngân hàng ABC
-         * */
+//        //Brgin call function
         try {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "http://www.acb.com.vn/ACBComponent/jsp/html/vn/exchange/getlisttygia.jsp");
@@ -70,81 +65,9 @@ class getExchanges extends Command
             $html = $SimpleHTMLDOM->str_get_html($server_output);
             $this->abc($SimpleHTMLDOM, $NgoaiTeCron, $html);
         }
-        /**
-         *Ngân hàng BIDV
-         * */
+
         $this->BIDV($NgoaiTeCron);
-        /**
-         *Ngân hàng Quốc dân
-         * */
-        $base = 'https://ngan-hang.com/ty-gia-ngan-hang-ncb';
 
-        $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', $base,[
-            'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
-                'Accept' => '*/*',
-                'Accept-Language' => 'vi-VN',
-            ],
-        ]);
-        $result = $response->getBody()->getContents();
-        $html = $SimpleHTMLDOM->str_get_html($result);
-        $this->quocdan($NgoaiTeCron,$html);
-        /**
-         *Ngân hàng nam a
-         * */
-        $base = 'http://www.namabank.com.vn/ty-gia-ngoai-te-gia-vang/274';
-        $response = $client->request('GET', $base);
-        $result = $response->getBody()->getContents();
-        $html = $SimpleHTMLDOM->str_get_html($result);
-        $this->nama($NgoaiTeCron,$html);
-        /**
-         *Ngân hàng baoviet
-         * */
-        try {
-            $html = $SimpleHTMLDOM->file_get_html('https://www.baovietbank.vn/vi/ty-gia');
-        } catch (\Exception $e) {
-            $html = null;
-        }
-        $this->baoviet($NgoaiTeCron,$html);
-        /**
-         *Ngân hàng agribank
-         * */
-        $today = Carbon::today()->format('d/m/Y');
-        $yesterday = Carbon::today()->subDays(1)->format('d/m/Y');
-        try {
-            $html = $SimpleHTMLDOM->file_get_html('http://www.agribank.com.vn/Layout/Pages/GetTyGia.aspx?date=' . $today . '&lang=1');
-        } catch (\Exception $e) {
-            $html = null;
-        }
-        $tt1 = $html->find("tr td");
-
-        if (empty($tt1)) {
-            try {
-                $html = $SimpleHTMLDOM->file_get_html('http://www.agribank.com.vn/Layout/Pages/GetTyGia.aspx?date=' . $yesterday . '&lang=1');
-            } catch (\Exception $e) {
-                $html = null;
-            }
-            $tt1 = $html->find("tr td");
-        }
-        $this->Agribank($NgoaiTeCron,$tt1);
-        /**
-         *Ngân hàng vib
-         * */
-        $url = 'https://www.vib.com.vn/wps/portal/vn/tool-landing/tygia';
-        $html = $SimpleHTMLDOM->file_get_html($url);
-        try{
-            $url = 'https://www.vib.com.vn/wps/portal/vn/tool-landing/tygia';
-            $html = $SimpleHTMLDOM->file_get_html($url);
-
-        }catch(\Exception $e){
-            $this->CreateLog($NgoaiTeCron, "Cập nhật không thành công vib vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"vib");
-            $html = null;
-        }
-        $this->vib($NgoaiTeCron, $html);
-        /**
-         *Ngân hàng techcombank
-         * */
         try{
             $urlTechcombank = "https://www.techcombank.com.vn/cong-cu-tien-ich/ti-gia/ti-gia-hoi-doai";
             $htmlTechcombank = $SimpleHTMLDOM->file_get_html($urlTechcombank);
@@ -153,9 +76,6 @@ class getExchanges extends Command
             $htmlTechcombank = null;
         }
         $this->Techcombank($htmlTechcombank, $NgoaiTeCron);
-        /**
-         *Ngân hàng hsbc
-         * */
         try{
             $urlHSBC = "https://www.hsbc.com.vn/1/2/miscellaneous/exchange_rate";
             $htmlHSBC = $SimpleHTMLDOM->file_get_html($urlHSBC);
@@ -164,9 +84,6 @@ class getExchanges extends Command
             $htmlHSBC = null;
         }
         $this->HSBC($htmlHSBC, $NgoaiTeCron);
-        /**
-         *Ngân hàng shb
-         * */
         try{
             $urlSHB = "https://www.shb.com.vn/tygia/ty-gia-hoi-doai/";
             $htmlSHB = $SimpleHTMLDOM->file_get_html($urlSHB);
@@ -175,21 +92,14 @@ class getExchanges extends Command
             $htmlSHB = null;
         }
         $this->SHB($htmlSHB, $NgoaiTeCron);
-        /**
-         *Ngân hàng vietinbank
-         * */
         $urlViettinBank = 'https://www.vietinbank.vn/web/home/vn/ty-gia/';
         try {
             $htmlViettinBank = $SimpleHTMLDOM->file_get_html($urlViettinBank);
-
+            $this->vietinbank($htmlViettinBank, $NgoaiTeCron);
         } catch (\Exception $e) {
             $this->CreateLog($NgoaiTeCron, "Cập nhật không thành công Vietin Bank vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"vietin");
             $html = null;
         }
-        $this->vietinbank($htmlViettinBank, $NgoaiTeCron);
-        /**
-         *Ngân hàng sacombank
-         * */
         try{
             $urlSacombank = 'https://www.sacombank.com.vn/company/Pages/ty-gia.aspx';
             $htmlSacombank = $SimpleHTMLDOM->file_get_html($urlSacombank);
@@ -198,9 +108,6 @@ class getExchanges extends Command
             $htmlSacombank = null;
         }
         $this->sacombank($htmlSacombank, $NgoaiTeCron);
-        /**
-         *Ngân hàng vietcombank
-         * */
         try{
             $urlVietComBank = 'http://www.vietcombank.com.vn/ExchangeRates/ExrateXML.aspx';
             $htmlVietcomBank = file_get_contents($urlVietComBank);
@@ -209,9 +116,6 @@ class getExchanges extends Command
             $htmlVietcomBank = null;
         }
         $this->vietcombank($htmlVietcomBank, $NgoaiTeCron);
-        /**
-         *Ngân hàng dongabank
-         * */
         try{
             $urlDongABank = "http://kinhdoanh.dongabank.com.vn/widget/temp?p_p_id=DTSCDongaBankEView_WAR_DTSCDongaBankIERateportlet&p_p_lifecycle=0&p_p_state=maximized&p_p_mode=view";
             $htmlDongABank = $SimpleHTMLDOM->file_get_html($urlDongABank);
@@ -220,9 +124,7 @@ class getExchanges extends Command
             $htmlDongABank = null;
         }
         $this->dongabank($htmlDongABank, $NgoaiTeCron);
-        /**
-         *Ngân hàng eximbank
-         * */
+
         $url = "https://eximbank.com.vn/WebsiteExrate/ExchangeRate_vn_2012.aspx";
         try{
             $html = $SimpleHTMLDOM->file_get_html($url);
@@ -232,6 +134,23 @@ class getExchanges extends Command
         }
         $this->eximbank($html, $NgoaiTeCron);
 
+        $Carbon = new Carbon();
+        $day = $Carbon->day;
+        $month = $Carbon->month;
+        $year = $Carbon->year;
+        $date = $Carbon->format('d/m/Y');
+        $time = $Carbon->format('h:m:i');
+        $url = "http://www.agribank.com.vn/LayOut/Pages/TyGiaPopUp.aspx?date=".$day."/".$month."/".$year."&lang=1";
+//        $url = "http://www.agribank.com.vn/LayOut/Pages/TyGiaPopUp.aspx?date=8/4/2019&lang=1";
+        try{
+            $html = $SimpleHTMLDOM->file_get_html($url);
+        }catch(\Exception $exception){
+            $html = null;
+        }
+        if($this->agribank($html, $NgoaiTeCron) === "datanone"){
+            $day = $day - 1;
+        }else{
+        }
 
         $urlMBBank = "https://webgia.com/ty-gia/mbbank/";
         try{
@@ -259,7 +178,8 @@ class getExchanges extends Command
             $htmlMSB = null;
         }
         $this->msb($htmlMSB, $NgoaiTeCron);
-        $this->insertNameCurrency($NgoaiTeCron);
+
+        $this->insertNameCurrency();
 
         $CapNhatNgoaiTe = new ApiFrontController();
         $CapNhatNgoaiTe->capnhatngoaite();
@@ -299,7 +219,6 @@ class getExchanges extends Command
     /**
      * function ACB
      * */
-
     protected function abc($SimpleHTMLDOM, $NgoaiTeCron, $html)
     {
         if($html){
@@ -372,130 +291,27 @@ class getExchanges extends Command
             }$this->CreateLog($NgoaiTeCron, "Cập nhật thành công ACB vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"acb");
         }
     }
-    /**
-     * function Agribank
-     * */
-    protected function Agribank($ngoaitecron,$ttl){
 
-        $thongtin1 = array();
-
-        foreach ($ttl as $key => $t1) {
-            $thongtin1[$key] = (trim($t1->innertext) !== "-") ? trim($t1->innertext) : null;
-        }
-        $tygiatho = array_chunk($thongtin1, 4, true);
-        ///Reset lại key theo thứ tự
-        $tygiatho = array_map('array_values', $tygiatho);
-
-        $tygia = array();
-        $vl = array();
-        foreach ($tygiatho as $key => $tg){
-
-            $vl['muatienmat'] = floatval(str_replace(",", "", $tg[1]));
-            $vl['bantienmat'] = floatval(str_replace(",", "", $tg[3]));
-            $vl['muachuyenkhoan'] = floatval(str_replace(",", "", $tg[2]));
-            $vl['banchuyenkhoan'] = null;
-
-            $tygia[$tg[0]] = $vl;
-        }
-        $bank_info = BankInfo::where('bankcode','agribank')->first(['id','bankname','bankcode','logo']);
-        if ($bank_info){
-            foreach ($tygia as $code => $value){
-                $value['code'] = $code;
-                $value['cron_id'] = $ngoaitecron;
-                $ngoaite = new NgoaiTe();
-                $result = NgoaiTe::create($value,$bank_info);
-                if ($result){
-                    echo "Cập nhật dữ liệu Agribank với đồng ".$value['code']." thành công \n";
-                }else{
-                    echo "Cập nhật dữ liệu Agribank với đồng ".$value['code']."không thành công \n";
-                    continue;
-                }
-            }
-            $Carbon = Carbon::now();
-            $this->CreateLog($ngoaitecron, "Cập nhật thành công Agribank vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"Agribank");
-        }
-    }
-    /**
-     * function Quốc dân
-     * */
-    public function quocdan($ngoaitecron,$html){
-        if($html){
-            $tt1 = $html->find("tr td.priceToday");
-            $thongtin = array();
-            foreach ($tt1 as $key => $t1) {
-
-                $tex = explode("\t", $t1->innertext);
-                $thongtin[$key] = floatval(str_replace(",", "", $tex[0]));
-            }
-
-            $tygiatho = array_chunk($thongtin, 3, true);
-            $tygiatho = array_map('array_values', $tygiatho);
-
-            $tgia = array();
-            foreach ($tygiatho as $key => $tg) {
-                $vl['muatienmat'] = $tg[0];
-                $vl['bantienmat'] = $tg[2];
-                $vl['muachuyenkhoan'] = $tg[1];
-                $vl['banchuyenkhoan'] = null;
-                $tgia[$key] = $vl;
-            }
-
-
-            $tt2 = $html->find("a[title^='Tỷ giá']");
-            $thongtin2 = array();
-            foreach ($tt2 as $key => $t2) {
-                $thongtin2[$key] = $t2->innertext;
-            }
-            unset($thongtin2[0]);
-            unset($thongtin2[2]);
-            unset($thongtin2[4]);
-            unset($thongtin2[6]);
-            unset($thongtin2[8]);
-            unset($thongtin2[10]);
-            unset($thongtin2[12]);
-            unset($thongtin2[14]);
-            unset($thongtin2[16]);
-            $vl = array_combine($thongtin2, $tgia);
-
-            $bank_info = BankInfo::where('bankcode','ncb')->first(['id','bankname','bankcode','logo']);
-            if ($bank_info){
-                foreach ($vl as $code => $value){
-                    $value['code'] = $code;
-                    $value['cron_id'] = $ngoaitecron;
-                    $ngoaite = new NgoaiTe();
-                    $result = NgoaiTe::create($value,$bank_info);
-                    if ($result){
-                        echo "Cập nhật dữ liệu NCB với đồng ".$value['code']." thành công \n";
-                    }else{
-                        echo "Cập nhật dữ liệu NCB với đồng ".$value['code']."không thành công \n";
-                        continue;
-                    }
-                }
-                $Carbon = Carbon::now();
-                $this->CreateLog($ngoaitecron, "Cập nhật thành công NCB vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"NCB");
-            }
-        }
-
-    }
     /**
      * function BIDV
      * */
-
     protected function BIDV($NgoaiTeCron)
     {
-        $client = new \GuzzleHttp\Client();
-
-        $res = $client->request('GET', 'https://www.bidv.com.vn/ServicesBIDV/ExchangeDetailServlet', [
-            'verify' => false,
-            'proxy' => [
-                'http'  => 'http://gy7651y5:f3om7895@104.144.22.205:4444',
-                'https'  => 'http://gy7651y5:f3om7895@104.144.22.205:4444',
-            ]
-
-        ]);
-
-        $result = $res->getBody()->getContents();
-
+        $url = "https://www.bidv.com.vn/ServicesBIDV/ExchangeDetailServlet";
+        try{
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, "");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/x-www-form-urlencoded'
+            ));
+            $result = curl_exec($ch);
+            curl_close($ch);
+        }catch(\Exception $e){
+            $result = null;
+        }
         $Carbon = Carbon::now();
         if($result) {
             $response = json_decode($result);
@@ -576,10 +392,8 @@ class getExchanges extends Command
      */
     protected function Techcombank($htmlTechcombank, $NgoaiTeCron){
         if($htmlTechcombank) {
-            try{
             $rows = $htmlTechcombank->find("div#exchangeFilterContainer div.table-responsive table tbody tr");
             $time = $htmlTechcombank->find("div#exchangeFilterContainer div.table-responsive table tbody td em");
-
             $strip_time = strip_tags($time[0]->innertext);
             /**
              * Begin for init i = 4, i + 2
@@ -675,10 +489,6 @@ class getExchanges extends Command
                     return response()->json(["message", "Cannot find data in url!"]);
                 }
             } else {
-            }
-
-            }catch (\Exception $ex){
-                echo "update false! ". $ex->getMessage();
             }
         }
     }
@@ -815,7 +625,91 @@ class getExchanges extends Command
      * SHB function
      * */
     public function SHB($html, $NgoaiTeCron){
-
+        if($html) {
+            $time = null;
+            $rows = $html->find("div.box_tigia div#show_exchange table.table-striped tr");
+            $getTime = $html->find("div.search_tygia input[type=text]");
+            foreach ($getTime as $value) {
+                $time = Carbon::now();
+            }
+            $arrDataSHB = array();
+            if (count($rows) > 0) {
+                for ($i = 1; $i < count($rows); $i++) {
+                    $currency_name = $rows[$i]->find("td", 1)->innertext;
+                    $currency_code = $rows[$i]->find("td", 1)->innertext;
+                    $currency_buy_money = $rows[$i]->find('td', 2)->innertext;
+                    $currency_transfer = $rows[$i]->find('td', 3)->innertext;
+                    $currency_sell_money = $rows[$i]->find('td', 4)->innertext;
+                    $arrTemp = array(
+                        "currency_code" => $currency_code,
+                        "currency_name" => $currency_name,
+                        "currency_buy_money" => $currency_buy_money,
+                        "currency_buy_transfer" => $currency_transfer,
+                        "currency_sell_money" => $currency_sell_money,
+                        "date" => $time,
+                        "time" => $time
+                    );
+                    array_push($arrDataSHB, $arrTemp);
+                }
+            } else {
+                return null;
+            }
+            if (count($arrDataSHB) > 0) {
+                foreach ($arrDataSHB as $data) {
+                    $NgoaiTe = new NgoaiTe();
+                    $NgoaiTe->code = $data["currency_code"];
+                    $NgoaiTe->bank_id = 3;
+                    $NgoaiTe->bank_code = "shb";
+                    $NgoaiTe->bank_name = "SHB";
+                    $NgoaiTe->bank_image = "/storage/userfiles/images/icons/SHB.png";
+                    $NgoaiTe->symbol = $this->checkSymbol(str_replace(' ','',str_replace('(', '', $data['currency_code'])));
+                    $NgoaiTe->image = "/storage/currency/".str_replace(' ','',str_replace('(', '', $data['currency_code'])) . ".png";
+                    $NgoaiTe->cron_id = $NgoaiTeCron;
+                    $NgoaiTe->vname = "";
+                    $NgoaiTe->ename = "";
+                    if ($data["currency_buy_money"] == null || $data["currency_buy_money"] == "") {
+                        $NgoaiTe->muatienmat = 0;
+                    } else {
+                        $NgoaiTe->muatienmat = floatval(str_replace(',', '', $data["currency_buy_money"]));
+                    }
+                    if ($data["currency_sell_money"] == null || $data["currency_sell_money"] == "") {
+                        $NgoaiTe->bantienmat = 0;
+                    } else {
+                        $NgoaiTe->bantienmat = floatval(str_replace(',', '', $data["currency_sell_money"]));
+                    }
+                    if ($data["currency_buy_transfer"] == null || $data["currency_buy_transfer"] == "") {
+                        $NgoaiTe->muachuyenkhoan = 0;
+                    } else {
+                        $NgoaiTe->muachuyenkhoan = floatval(str_replace(',', '', $data["currency_buy_transfer"]));
+                    }
+                    if ($data["currency_sell_money"] == null || $data["currency_sell_money"] == "") {
+                        $NgoaiTe->banchuyenkhoan = 0;
+                    } else {
+                        $NgoaiTe->banchuyenkhoan = floatval(str_replace(',', '', $data["currency_sell_money"]));
+                    }
+                    $NgoaiTe->date = $data["date"];
+                    $NgoaiTe->time = $data["time"];
+                    //Save vào bảng Ngoại Tệ mới
+                    $arr_diff = $this->tygiaNow($data["currency_code"], 3, $NgoaiTe,$NgoaiTeCron);
+                    if( $arr_diff ){ // success
+                        $NgoaiTe->muatienmat_diff = $arr_diff["tyle_muatienmat"];
+                        $NgoaiTe->bantienmat_diff = $arr_diff["tyle_bantienmat"];
+                        $NgoaiTe->muachuyenkhoan_diff = $arr_diff["tyle_muachuyenkhoan"];
+                        $NgoaiTe->banchuyenkhoan_diff = $arr_diff["tyle_banchuyenkhoan"];
+                        $NgoaiTe->save();
+                        echo "Cập nhật dữ liệu SHB với đồng ".$data['currency_code']."  thành công \n";
+                    }else{ // failed
+                        echo "Insert new money \n";
+                        continue;
+                    }
+                }
+                $Carbon = Carbon::now();
+                $this->CreateLog($NgoaiTeCron, "Cập nhật thành công SHB vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"shb");
+                return response()->json(["message", "Get dat success"]);
+            } else {
+                return null;
+            }
+        }
     }
     /**
      * Viettin bank
@@ -1175,7 +1069,7 @@ class getExchanges extends Command
                     $NgoaiTe->muachuyenkhoan_diff = $arr_diff["tyle_muachuyenkhoan"];
                     $NgoaiTe->banchuyenkhoan_diff = $arr_diff["tyle_banchuyenkhoan"];
                     $NgoaiTe->save();
-                    echo "Cập nhật dữ liệu Đông Á Bank với đồng ".strip_tags($key)."  thành công \n";
+                    echo "Cập nhật dữ liệu ACB với đồng ".strip_tags($key)."  thành công \n";
                 }else{ // failed
                     echo "Insert new money \n";
                     continue;
@@ -1184,181 +1078,6 @@ class getExchanges extends Command
             $Carbon = Carbon::now();
             $this->CreateLog($NgoaiTeCron, "Cập nhật thành công Đông Á Bank vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"dab")  . "\n";
         }
-    }
-    /**
-     * Vib a bank
-     * */
-    public function vib($ngoaitecron,$html){
-
-        $table = $html->find('table',0);
-        $trs = $table->find('tbody tr');
-        $array = array();
-        $bank_info = BankInfo::where('bankcode','vib')->first(['id','bankname','bankcode','logo']);
-        if ($bank_info){
-            foreach ($trs as $key => $tr){
-                $code = $tr->find('td',0)->innertext;
-                $array[$code]['muatienmat'] = $this->checkIssetMoney($this->replaceStr($tr->find('td',1)->innertext));
-                $array[$code]['muachuyenkhoan']= $this->checkIssetMoney($this->replaceStr($tr->find('td',2)->innertext));
-                $array[$code]['bantienmat'] = $this->checkIssetMoney($this->replaceStr($tr->find('td',3)->innertext));
-                $array[$code]['banchuyenkhoan']= null;
-            }
-            foreach ($array as $code => $value){
-                $value['code'] = $code;
-                $value['cron_id'] = $ngoaitecron;
-                $ngoaite = new NgoaiTe();
-                $result = NgoaiTe::create($value,$bank_info);
-                if ($result){
-                    echo "Cập nhật dữ liệu vib với đồng ".$value['code']." thành công \n";
-                }else{
-                    echo "Cập nhật dữ liệu vib với đồng ".$value['code']."không thành công \n";
-                    continue;
-                }
-            }
-            $Carbon = Carbon::now();
-            $this->CreateLog($ngoaitecron, "Cập nhật thành công Vib vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"vib");
-        }
-
-    }
-    /**
-     * baoviet a bank
-     * */
-    public function baoviet($ngoaitecron,$html){
-        if($html){
-            $tt1 = $html->find("tr td");
-
-            $thongtin = array();
-            foreach ($tt1 as $key => $t1) {
-                $thongtin[$key] = (trim($t1->innertext) !== "-") ? trim($t1->innertext) : null;
-            }
-
-            unset($thongtin[0]);
-            unset($thongtin[1]);
-            unset($thongtin[2]);
-            unset($thongtin[3]);
-            unset($thongtin[4]);
-            unset($thongtin[5]);
-            unset($thongtin[6]);
-            unset($thongtin[8]);
-            unset($thongtin[11]);
-            unset($thongtin[12]);
-            unset($thongtin[14]);
-            unset($thongtin[17]);
-            unset($thongtin[19]);
-            unset($thongtin[22]);
-            unset($thongtin[24]);
-            unset($thongtin[27]);
-            unset($thongtin[29]);
-            unset($thongtin[32]);
-            unset($thongtin[34]);
-            unset($thongtin[37]);
-            unset($thongtin[39]);
-            unset($thongtin[42]);
-            unset($thongtin[44]);
-
-            $newtk = array();
-            foreach ($thongtin as $key => $tk){
-                $tk1 = str_replace("<strong>", "", $tk);
-                $tk2 = str_replace("</strong>", "", $tk1);
-                $tk3 = str_replace(",", "", $tk2);
-                $tk4 = str_replace("<div>", "", $tk3);
-                $tk5 = str_replace("</div>", "", $tk4);
-                $newtk[$key] = $tk5;
-
-            }
-
-            $tygiatho = array_chunk($newtk, 3, true);
-            ///Reset lại key theo thứ tự
-            $tygiatho = array_map('array_values', $tygiatho);
-
-            $tygia = array();
-            $vl = array();
-            foreach ($tygiatho as $key => $tg) {
-                $vl['muatienmat'] = floatval($tg[1]);
-                $vl['bantienmat'] = floatval($tg[2]);
-                $vl['muachuyenkhoan'] = floatval($tg[1]);
-                $vl['banchuyenkhoan'] = floatval($tg[1]);
-
-                $tygia[$tg[0]] = $vl;
-            }
-            $bank_info = BankInfo::where('bankcode','baoviet')->first(['id','bankname','bankcode','logo']);
-            if ($bank_info){
-                foreach ($tygia as $code => $value){
-                    $value['code'] = $code;
-                    $value['cron_id'] = $ngoaitecron;
-                    $ngoaite = new NgoaiTe();
-                    $result = NgoaiTe::create($value,$bank_info);
-                    if ($result){
-                        echo "Cập nhật dữ liệu baoviet với đồng ".$value['code']." thành công \n";
-                    }else{
-                        echo "Cập nhật dữ liệu baoviet với đồng ".$value['code']."không thành công \n";
-                        continue;
-                    }
-                }
-                $Carbon = Carbon::now();
-                $this->CreateLog($ngoaitecron, "Cập nhật thành công baoviet vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"baoviet");
-
-            }
-        }
-
-
-    }
-    /**
-     * nam a  bank
-     * */
-    public function nama($ngoaitecron,$html){
-        if($html){
-                $tt1 = $html->find("tr td");
-
-                $thongtin = array();
-                foreach ($tt1 as $key => $t1) {
-                    $thongtin[$key] = (trim($t1->innertext) !== "-") ? trim($t1->innertext) : null;
-                }
-
-                $tge = array_slice($thongtin, 6, 44);
-
-                $newtk = array();
-                foreach ($tge as $key => $tk){
-                    $tk1 = str_replace(" ₫", "", $tk);
-                    $newtk[$key] = $tk1;
-                }
-
-                $tygiatho = array_chunk($newtk, 4, true);
-                ///Reset lại key theo thứ tự
-                $tygiatho = array_map('array_values', $tygiatho);
-                $tgia = array();
-                $vl = array();
-                foreach ($tygiatho as $key => $tg) {
-
-                    if($tg[0] == 'NOK'){
-                        continue;
-                    }
-
-                        $vl['muatienmat'] = floatval($this->replaceStr($tg[1]));
-                        $vl['bantienmat'] = floatval($this->replaceStr($tg[3]));
-                        $vl['muachuyenkhoan'] = floatval($this->replaceStr($tg[2]));
-                        $vl['banchuyenkhoan'] = null;
-
-                    $tgia[$tg[0]] = $vl;
-                }
-                $bank_info = BankInfo::where('bankcode','nama')->first(['id','bankname','bankcode','logo']);
-            if ($bank_info){
-                foreach ($tgia as $code => $value){
-                    $value['code'] = $code;
-                    $value['cron_id'] = $ngoaitecron;
-                    $ngoaite = new NgoaiTe();
-                    $result = NgoaiTe::create($value,$bank_info);
-                    if ($result){
-                        echo "Cập nhật dữ liệu nama với đồng ".$value['code']." thành công \n";
-                    }else{
-                        echo "Cập nhật dữ liệu nama với đồng ".$value['code']."không thành công \n";
-                        continue;
-                    }
-                }
-                $Carbon = Carbon::now();
-                $this->CreateLog($ngoaitecron, "Cập nhật thành công nama vào lúc: " .$Carbon->format('h:i:s d/m/Y'),"nama");
-            }
-        }
-
     }
     protected function checkIssetMoney($money){
         if($money == ""){
@@ -1372,22 +1091,93 @@ class getExchanges extends Command
      * param: code
      * @return more
      * */
-    protected function insertNameCurrency($ngoaitecron){
-        $NgoaiTe = NgoaiTe::where('cron_id',$ngoaitecron)->where(function ($query){
-            $query->whereNull('vname')
-                ->orwhereNull('ename');
-        })->select("code","vname","ename")->get();
-
+    protected function insertNameCurrency(){
+        $NgoaiTe = NgoaiTe::select("code","vname","ename")->get();
+        $CurrencyCode = CurrencyCode::select("code","name","vname")->get();
         foreach($NgoaiTe as $ngoaite){
-            $CurrencyCode = CurrencyCode::where('code',$ngoaite->code)->select("code","name","vname")->first();
-            if ($CurrencyCode){
-                        $ngoaite->ename = $CurrencyCode->name;
-                        $ngoaite->vname = $CurrencyCode->vname;
+            if($ngoaite->vname == null || $ngoaite->ename == null){
+                foreach($CurrencyCode as $currencycode){
+                    if($ngoaite->code == $currencycode->code || "(".$currencycode->code.")" ==  $ngoaite->code){
+                        $ngoaite->ename = $currencycode->name;
+                        $ngoaite->vname = $currencycode->vname;
                         $ngoaite->save();
+                    }else{
                     }
+                }
+            }else{
+            }
         }
     }
 
+
+    public function agribank($html, $NgoaiTeCron){
+
+        if($html){
+            $table = $html->find("#tblTG table");
+            if(count($table) > 0){
+                $tr = $html->find("#tblTG table tr");
+                for($i = 1; $i < count($tr); $i++){
+                    $mangoaite = str_replace(',','',$tr[$i]->find("td",0)->innertext);
+                    $muatienmat = str_replace(',','',$tr[$i]->find("td",1)->innertext);
+                    $muachuyenkhoan = str_replace(',','',$tr[$i]->find("td",2)->innertext);
+                    $bantienmat = str_replace(',','',$tr[$i]->find("td",3)->innertext);
+
+                    $NgoaiTe = new NgoaiTe();
+                    $NgoaiTe->code = strip_tags($mangoaite);
+                    $NgoaiTe->bank_id = 13;
+                    $NgoaiTe->bank_code = "agribank";
+                    $NgoaiTe->bank_name = "Argibank";
+                    $NgoaiTe->bank_image = "/storage/userfiles/images/icons/argibank.png";
+                    $NgoaiTe->symbol = $this->checkSymbol(strip_tags($mangoaite));
+                    $NgoaiTe->image = "/storage/currency/".strip_tags($mangoaite) . ".png";
+                    $NgoaiTe->cron_id = $NgoaiTeCron;
+                    $NgoaiTe->vname = "";
+                    $NgoaiTe->ename = "";
+                    if ($muatienmat == "" || $muatienmat == null) {
+                        $NgoaiTe->muatienmat = 0;
+                    } else {
+                        $NgoaiTe->muatienmat = floatval($muatienmat);
+                    }
+                    if ($muachuyenkhoan == "" || $muachuyenkhoan == null) {
+                        $NgoaiTe->bantienmat = 0;
+                    } else {
+                        $NgoaiTe->bantienmat = floatval($muachuyenkhoan);
+                    }
+                    if ($bantienmat == "" || $bantienmat == null) {
+                        $NgoaiTe->muachuyenkhoan = 0;
+                    } else {
+                        $NgoaiTe->muachuyenkhoan = floatval($bantienmat);
+                    }
+                    if ($bantienmat == "" || $bantienmat == null) {
+                        $NgoaiTe->banchuyenkhoan = 0;
+                    } else {
+                        $NgoaiTe->banchuyenkhoan = floatval($bantienmat);
+                    }
+                    $Carbon = Carbon::now();
+                    $NgoaiTe->date = $Carbon;
+                    $NgoaiTe->time = $Carbon;
+                    //Save vào bảng Ngoại Tệ mới
+                    $arr_diff = $this->tygiaNow(strip_tags($mangoaite), 13, $NgoaiTe,$NgoaiTeCron);
+                    if( $arr_diff ){ // success
+                        $NgoaiTe->muatienmat_diff = $arr_diff["tyle_muatienmat"];
+                        $NgoaiTe->bantienmat_diff = $arr_diff["tyle_bantienmat"];
+                        $NgoaiTe->muachuyenkhoan_diff = $arr_diff["tyle_muachuyenkhoan"];
+                        $NgoaiTe->banchuyenkhoan_diff = $arr_diff["tyle_banchuyenkhoan"];
+                        $NgoaiTe->save();
+                        echo "Cập nhật dữ liệu Argibank với đồng ".strip_tags($mangoaite)." thành công \n";
+                    }else{ // failed
+                        echo "Insert new money \n";
+                        continue;
+                    }
+
+                }
+            }else{
+                return "datanone";
+            }
+        }else{
+        }
+
+    }
 
     public function eximbank($html, $NgoaiTeCron){
 
@@ -2003,13 +1793,6 @@ class getExchanges extends Command
         }else if($code == "TWD"){
             return "&#36;";
         }
-    }
-
-    protected function replaceStr($str){
-        $check0 = str_replace('-','',$str);
-        $check1 = str_replace('.','',$check0);
-        $check2 = str_replace(',','.',$check1);
-        return $check2;
     }
 
 

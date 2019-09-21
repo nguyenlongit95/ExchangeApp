@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Modules\Exchanges\Models\BankInfo;
-use App\Modules\Exchanges\Models\LoaiTienAo;
+use App\Models\BankInfo;
+use App\Models\LoaiTienAo;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use File;

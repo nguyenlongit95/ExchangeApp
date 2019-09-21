@@ -7,7 +7,7 @@ class sizeFomat{
      * Tham số đầu vào là dung lượng của file tính theo byte
      * Trả lại kết qủa tương ứng với dung lượng của file đã được chuyển đổi
      * */
-    public function sizeFormat($size)
+    function sizeFormat($size)
     {
         if($size<1024)
         {
@@ -30,54 +30,7 @@ class sizeFomat{
         }
     }
 
-    public function convertByteToMB($size){
-        if($size==null)
-        {
-            return 0;
-        }
-        else
-        {
-            $size=round($size/(1024*1024),1);
-            return $size;
-        }
-    }
-    public function convertMbToByte($size){
-        if($size==null)
-        {
-            return 0;
-        }
-        else
-        {
-            $size=round($size * (1024*1024));
-            return $size;
-        }
-    }
-
-    public function convertMbToGb($size){
-        if($size==null)
-        {
-            return 0;
-        }
-        else
-        {
-            $size=round($size / (1024));
-            return $size;
-        }
-    }
-
-    public function convertGbToByte($size){
-        if($size==null)
-        {
-            return 0;
-        }
-        else
-        {
-            $size=round($size * (1024*1024*1024));
-            return $size;
-        }
-    }
-
-    public function convertByteToGB($size)
+    function convertByteToGB($size)
     {
         if($size==null)
         {
