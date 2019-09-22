@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-
+$namespace = 'Api';
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,4 +24,8 @@ Route::post('login','UserController@login');
 Route::post('register','UserController@register');
 Route::group(['middleware'=>'auth:api'], function(){
     Route::post('details','UserController@details');
+});
+
+Route::group(['prefix'=>'v1', 'namespace'=>$namespace], function() {
+    Route::get('test', 'ExchangeController@index');
 });
