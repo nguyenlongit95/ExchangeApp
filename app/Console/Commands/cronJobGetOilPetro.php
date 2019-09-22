@@ -1,16 +1,20 @@
 <?php
+
 namespace App\Console\Commands;
+
 use Illuminate\Console\Command;
+
 use App\Models\XangDau;
 use App\Helpers\SimpleHtmlDom;
-class getOilPetro extends Command
+
+class cronJobGetOilPetro extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'getOilPetro:getOilPetro';
+    protected $signature = 'cronJob:getOilPetro';
     /**
      * The console command description.
      *
@@ -35,27 +39,28 @@ class getOilPetro extends Command
     {
         $SimpleHTMLDOM = new SimpleHtmlDom();
         $url = "https://www.petrolimex.com.vn/";
-        try{
+        try {
             $html = $SimpleHTMLDOM->file_get_html($url);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $html = null;
         }
-        if($html){
+        if ($html) {
             $this->getOilPetrolimex($html);
         }
     }
-    public function getOilPetrolimex($html){
+    public function getOilPetrolimex($html)
+    {
         $rows = $html->find("div#vie_3_Right div#vie_p6_Container div#vie_p6_PortletContent div.list-table div");
         $arrXangDau = array();
-        for($i = 3; $i < count($rows); $i+=2){
+        for ($i = 3; $i < count($rows); $i += 2) {
             array_push($arrXangDau, $rows[$i]);
         }
-        for($j = 0; $j < count($arrXangDau); $j+=2){
+        for ($j = 0; $j < count($arrXangDau); $j += 2) {
             $XangDau = new XangDau();
-            $XangDau->ten = strip_tags($arrXangDau[$j]->find("div",0));
+            $XangDau->ten = strip_tags($arrXangDau[$j]->find("div", 0));
             $XangDau->slug = "petrolimex";
-            $XangDau->giavung1 = floatval(str_replace(',','.',strip_tags($arrXangDau[$j]->find("div",1))));
-            $XangDau->giavung2 = floatval(str_replace(',','.',strip_tags($arrXangDau[$j]->find("div",2))));
+            $XangDau->giavung1 = floatval(str_replace(',', '.', strip_tags($arrXangDau[$j]->find("div", 1))));
+            $XangDau->giavung2 = floatval(str_replace(',', '.', strip_tags($arrXangDau[$j]->find("div", 2))));
             $XangDau->save();
         }
     }

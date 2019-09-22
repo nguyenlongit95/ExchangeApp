@@ -3,16 +3,18 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+
 use App\Models\TienAo;
 use App\Models\LoaiTienAo;
-class getVirtualMoney extends Command
+
+class cronJobVirtualMoney extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'getVirtualMoney:VirtualMoney';
+    protected $signature = 'cronJob:getVirtualMoney';
 
     /**
      * The console command description.
@@ -42,27 +44,28 @@ class getVirtualMoney extends Command
         $this->bitcoin();
     }
 
-    public function bitcoin(){
+    public function bitcoin()
+    {
         $CurrencyUSD = "USD";
         $CurrencyVND = "VND";
         $ApiKey = "395cfc82-a582-4171-8c2b-49e72e5d8f1f";
-        try{
-            $jsonDataUSD = $this->callAPIS($CurrencyUSD,1, 5000,$ApiKey);
-            $jsonDataVND = $this->callAPIS($CurrencyVND,1, 5000, $ApiKey);
-        }catch(\Exception $e){
+        try {
+            $jsonDataUSD = $this->callAPIS($CurrencyUSD, 1, 5000, $ApiKey);
+            $jsonDataVND = $this->callAPIS($CurrencyVND, 1, 5000, $ApiKey);
+        } catch (\Exception $e) {
             $jsonDataUSD = null;
             $jsonDataVND = null;
         }
-        if($jsonDataUSD->status->error_code != 0){
-            return response()->json(["message",$jsonDataUSD->status->error_message]);
+        if ($jsonDataUSD->status->error_code != 0) {
+            return response()->json(["message", $jsonDataUSD->status->error_message]);
         }
         /**
          * get USD
          * @currency_type is "USD"
          * */
         $i = 0;
-        foreach($jsonDataUSD->data as $key=>$value){
-            if($i < 27) {
+        foreach ($jsonDataUSD->data as $key => $value) {
+            if ($i < 27) {
                 $TienAo = new TienAo();
                 $TienAo->name = $value->name;
                 $TienAo->symbol = $value->symbol;
@@ -70,10 +73,10 @@ class getVirtualMoney extends Command
                 $TienAo->circulating_supply = $value->circulating_supply;
                 $TienAo->total_supply = $value->total_supply;
                 $TienAo->max_supply = $value->max_supply;
-//            $TienAo->date_added = $value->date_added;
+                //            $TienAo->date_added = $value->date_added;
                 $TienAo->num_market_pairs = $value->num_market_pairs;
                 $TienAo->rank = $value->cmc_rank;
-//            $TienAo->last_updated = $value->last_updated;
+                //            $TienAo->last_updated = $value->last_updated;
                 $TienAo->price = $value->quote->USD->price;
                 $TienAo->volume_24h = $value->quote->USD->volume_24h;
                 $TienAo->percent_change_1h = $value->quote->USD->percent_change_1h;
@@ -83,19 +86,19 @@ class getVirtualMoney extends Command
                 $TienAo->currency_type = $CurrencyUSD;
                 $TienAo->save();
                 $i++;
-            }else{
+            } else {
                 break;
             }
         }
         /**
          * get VND
          * */
-        if($jsonDataVND->status->error_code != 0){
-            return response()->json(["message",$jsonDataVND->status->error_message]);
+        if ($jsonDataVND->status->error_code != 0) {
+            return response()->json(["message", $jsonDataVND->status->error_message]);
         }
         $j = 0;
-        foreach($jsonDataVND->data as $value){
-            if($j < 27) {
+        foreach ($jsonDataVND->data as $value) {
+            if ($j < 27) {
                 $TienAo = new TienAo();
                 $TienAo->name = $value->name;
                 $TienAo->symbol = $value->symbol;
@@ -103,10 +106,10 @@ class getVirtualMoney extends Command
                 $TienAo->circulating_supply = $value->circulating_supply;
                 $TienAo->total_supply = $value->total_supply;
                 $TienAo->max_supply = $value->max_supply;
-//            $TienAo->date_added = $value->date_added;
+                //            $TienAo->date_added = $value->date_added;
                 $TienAo->num_market_pairs = $value->num_market_pairs;
                 $TienAo->rank = $value->cmc_rank;
-//            $TienAo->last_updated = $value->last_updated;
+                //            $TienAo->last_updated = $value->last_updated;
                 $TienAo->price = $value->quote->VND->price;
                 $TienAo->volume_24h = $value->quote->VND->volume_24h;
                 $TienAo->percent_change_1h = $value->quote->VND->percent_change_1h;
@@ -116,24 +119,25 @@ class getVirtualMoney extends Command
                 $TienAo->currency_type = $CurrencyVND;
                 $TienAo->save();
                 $j++;
-            }else{
+            } else {
                 break;
             }
         }
     }
 
-    protected function callAPIS($Currency, $Start, $limit,$ApiKey){
+    protected function callAPIS($Currency, $Start, $limit, $ApiKey)
+    {
         # This example requires curl is enabled in php.ini
         $url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest';
         $parameters = [
             'start' => $Start,
             'limit' => $limit,
-            'convert'=> $Currency,
+            'convert' => $Currency,
         ];
 
         $headers = [
             'Accepts: application/json',
-            'X-CMC_PRO_API_KEY: '. $ApiKey
+            'X-CMC_PRO_API_KEY: ' . $ApiKey
         ];
         $qs = http_build_query($parameters);
         $request = "{$url}?{$qs}"; // create the request URL

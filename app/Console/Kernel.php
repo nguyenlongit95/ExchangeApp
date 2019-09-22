@@ -13,16 +13,14 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-//        'App\Console\Commands\Viettelkpp',
+        // 'App\Console\Commands\getNews',
+        // 'App\Console\Commands\CreateSiteMap',
 
-        'App\Console\Commands\getExchanges',
-        'App\Console\Commands\getInterestRate',
-        'App\Console\Commands\getVirtualMoney',
-        'App\Console\Commands\getOilPetro',
-        'App\Console\Commands\GoldExchanges',
-        'App\Console\Commands\getNews',
-        'App\Console\Commands\CreateSiteMap',
-        'App\Console\Commands\getBankdata'
+        'App\Console\Commands\cronJobGetExchange',
+        'App\Console\Commands\cronJobGetInterestRate',
+        'App\Console\Commands\cronJobGetGold',
+        'App\Console\Commands\cronJobVirtualMoney',
+        'App\Console\Commands\cronJobGetOilPetro'
     ];
 
     /**
@@ -33,16 +31,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-//        $schedule->command('getExchanges:getDataBank')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
-        $schedule->command('getInterestRate:getInterestRate')->cron('* 8,9,10,15,16 * * *');
-        $schedule->command('getOilPetro:getOilPetro')->hourly();
-        $schedule->command('getVirtualMoney:VirtualMoney')->hourly();
-        $schedule->command('GoldExchanges:getGoldExchanges')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
-        $schedule->command('sitemap:create')->hourly();
+        // $schedule->command('sitemap:create')->hourly();
 
         //cron providers
-        $schedule->command('getExchanges:getBankdata')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
-//        $schedule->command('getNews:NewsTyGia')->hourly();
+        // $schedule->command('getExchanges:getBankdata')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
+        // $schedule->command('getNews:NewsTyGia')->hourly();
+
+        $schedule->command('cronJob:getExchanges')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
+        $schedule->command('cronJob:getInterestRate')->cron('* 8,9,10,15,16 * * *');
+        $schedule->command('cronJob:getGold')->cron('30 7,8,9,10,11,12,14,15,16,18,20,22 * * *');
+        $schedule->command('cronJob:getVirtualMoney')->hourly();
+        $schedule->command('cronJob:getOilPetro')->hourly();
     }
 
     /**

@@ -2,19 +2,20 @@
 
 namespace App\Console\Commands;
 
-use Carbon\Carbon;
 use Illuminate\Console\Command;
+
+use Carbon\Carbon;
 use App\Helpers\SimpleHtmlDom;
 use DB;
 
-class GoldExchanges extends Command
+class cronJobGetGold extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'GoldExchanges:getGoldExchanges';
+    protected $signature = 'cronJob:getGold';
 
     /**
      * The console command description.
@@ -30,7 +31,7 @@ class GoldExchanges extends Command
      */
     public function __construct()
     {
-       parent::__construct();
+        parent::__construct();
     }
 
     /**
@@ -101,55 +102,53 @@ class GoldExchanges extends Command
          * */
         $urlEximbank = "https://eximbank.com.vn/WebsiteExrate/Gold_vn_2012.aspx";
 
-        try{
+        try {
             $htmlEximbank = $dom->file_get_html($urlEximbank);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $htmlEximbank = null;
         }
         $this->sjcEximbank($htmlEximbank, $dom);
 
         $urlSacombank = "https://sacombank.com.vn/company/Pages/ty-gia.aspx";
-        try{
+        try {
             $htmlSacombank = $dom->file_get_html($urlSacombank);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $htmlSacombank = null;
         }
         $this->sjcSacombank($htmlSacombank, $dom);
 
         $urltg = "https://www.kitco.com/";
-        try{
+        try {
             $htmltg = $dom->file_get_html($urltg);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $htmltg = null;
         }
         $this->giavangtg($htmltg, $dom);
 
         $urlVietinbank = "http://vietinbankgold.vn/gia-vang.html";
-        try{
+        try {
             $htmlVietinbank = $dom->file_get_html($urlVietinbank);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $htmlVietinbank = null;
         }
         $this->sjcVietinbank($htmlVietinbank, $dom);
 
         $urlTechcombank = "https://techcombank.com.vn/cong-cu-tien-ich/ti-gia/ti-gia-vang";
-        try{
+        try {
             $htmlTechcombank = $dom->file_get_html($urlTechcombank);
-        }catch(\Exception $exception){
+        } catch (\Exception $exception) {
             $htmlTechcombank = null;
         }
-        $this->sjcTechcombank($htmlTechcombank,$dom);
-
+        $this->sjcTechcombank($htmlTechcombank, $dom);
     }
 
     public function checkCron($key = '', $nguon = '')
     {
         $check = DB::table('tygiavang_cron')
-            ->where('cron_key', $key )
-            ->where('nguon', $nguon )
+            ->where('cron_key', $key)
+            ->where('nguon', $nguon)
             ->first();
-        if( ! $check )
-        {
+        if (!$check) {
             return false;
         }
         return true;
@@ -169,25 +168,25 @@ class GoldExchanges extends Command
     public function insertVang($data, $OilCron)
     {
         $oidData = DB::table('tygiavang_data')
-            ->where('slug','=',$data['slug'])
-            ->where('cron_id','=',$OilCron->id)
-            ->orderBy('id','DESC')
+            ->where('slug', '=', $data['slug'])
+            ->where('cron_id', '=', $OilCron->id)
+            ->orderBy('id', 'DESC')
             ->get();
-        foreach($oidData as $value){
+        foreach ($oidData as $value) {
             $tyle_mua = 0;
             $tyle_ban = 0;
-            if($value->loai === $data['loai'] && $value->tinhthanh === $data['tinhthanh']){
-                if($data['mua'] > 0){
-                    $tyle_mua = 100 - (($value->mua / (float)$data['mua']) * 100);
-                }else{
+            if ($value->loai === $data['loai'] && $value->tinhthanh === $data['tinhthanh']) {
+                if ($data['mua'] > 0) {
+                    $tyle_mua = 100 - (($value->mua / (float) $data['mua']) * 100);
+                } else {
                     $tyle_mua = 0;
                 }
-                if($data['ban'] > 0){
-                    $tyle_ban = 100 - (($value->ban / (float)$data['ban']) * 100);
-                }else{
+                if ($data['ban'] > 0) {
+                    $tyle_ban = 100 - (($value->ban / (float) $data['ban']) * 100);
+                } else {
                     $tyle_ban = 0;
                 }
-            }else{
+            } else {
                 continue;
             }
         }
@@ -205,10 +204,10 @@ class GoldExchanges extends Command
             'data' => $data['data'],
             'donvi' => $data['donvi'],
         ]);
-        if($insertDB){
+        if ($insertDB) {
             echo "Insert" . $data['slug'] . "success;  ";
-        }else{
-            echo "Insert". $data['slug']. "failed";
+        } else {
+            echo "Insert" . $data['slug'] . "failed";
         }
     }
 
@@ -221,23 +220,21 @@ class GoldExchanges extends Command
             $updated = str_replace(' ngày ', '', $updated);
             $updated = str_replace(' ', '', $updated);
 
-            $OilCron = DB::table('tygiavang_cron')->where('slug','=','bao-tin-minh-chau')->orderBy('id','DESC')->first();
+            $OilCron = DB::table('tygiavang_cron')->where('slug', '=', 'bao-tin-minh-chau')->orderBy('id', 'DESC')->first();
 
-            $insert_id = $this->insertCron($updated, 'btmc.vn/api-get-list.htm','bao-tin-minh-chau');
+            $insert_id = $this->insertCron($updated, 'btmc.vn/api-get-list.htm', 'bao-tin-minh-chau');
 
             $donvi = 'Nghìn đồng / lượng';
             $_SESSION['tinhthanh'] = '';
             $trs = $html->find('table tbody tr');
-            foreach($trs as $tr)
-            {
+            foreach ($trs as $tr) {
                 $tds = $dom->str_get_html($tr->innertext);
                 $td = $tds->find('td');
 
-                if( count($td) == 6 )
-                {
+                if (count($td) == 6) {
                     $img = $dom->str_get_html($td[0]->outertext);
-                    $filename =  str_replace('/Data/upload/files/AnhThuongPham/', '', $img->find('img',0)->src);
-                    switch ($filename){
+                    $filename =  str_replace('/Data/upload/files/AnhThuongPham/', '', $img->find('img', 0)->src);
+                    switch ($filename) {
                         case 'vangrongthanglong.png':
                             $name =  'Vàng rồng Thăng Long';
                             break;
@@ -273,10 +270,9 @@ class GoldExchanges extends Command
                     $data['ban'] = str_replace('.', '', $td[4]->plaintext);
                     $data['data'] = '';
                     $data['donvi'] = $donvi;
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-                if( count($td) == 5 )
-                {
+                if (count($td) == 5) {
 
                     $data['cron_id'] = $insert_id;
                     $data['tieude'] = $td[0]->plaintext;
@@ -287,12 +283,10 @@ class GoldExchanges extends Command
                     $data['ban'] = str_replace('.', '', $td[3]->plaintext);
                     $data['data'] = '';
                     $data['donvi'] = $donvi;
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-
             }
             return 'Btmc Updated';
-
         }
         return 'html null';
     }
@@ -307,21 +301,19 @@ class GoldExchanges extends Command
             $updated = str_replace(' đến ', '_', $updated);
             $updated = explode('_', $updated)[0];
 
-            $OilCron = DB::table('tygiavang_cron')->where('slug','=','pnj')->orderBy('id','DESC')->first();
+            $OilCron = DB::table('tygiavang_cron')->where('slug', '=', 'pnj')->orderBy('id', 'DESC')->first();
 
-            $insert_id = $this->insertCron($updated, 'btmc.vn/api-get-list.htm','pnj');
+            $insert_id = $this->insertCron($updated, 'btmc.vn/api-get-list.htm', 'pnj');
 
             $donvi = 'Nghìn đồng / Lượng';
             $_SESSION['tinhthanh'] = '';
             $trs = $html->find("#column-2 .portlet-body table tbody tr");
-            foreach($trs as $tr)
-            {
+            foreach ($trs as $tr) {
                 $tds = $dom->str_get_html($tr->innertext);
                 $td = $tds->find('td');
 
-                if( count($td) == 5 )
-                {
-                    $_SESSION['tinhthanh'] = ($td[0]->plaintext != '')?  $td[0]->plaintext : $_SESSION['tinhthanh'];
+                if (count($td) == 5) {
+                    $_SESSION['tinhthanh'] = ($td[0]->plaintext != '') ?  $td[0]->plaintext : $_SESSION['tinhthanh'];
                     $data['cron_id'] = $insert_id;
                     $data['tieude'] = $td[1]->plaintext;
                     $data['slug'] = "pnj";
@@ -331,10 +323,9 @@ class GoldExchanges extends Command
                     $data['ban'] = str_replace('.', '', $td[3]->plaintext) / 10;
                     $data['data'] = '';
                     $data['donvi'] = $donvi;
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-                if( count($td) == 4 )
-                {
+                if (count($td) == 4) {
 
                     $data['cron_id'] = $insert_id;
                     $data['tieude'] = $td[0]->plaintext;
@@ -345,16 +336,13 @@ class GoldExchanges extends Command
                     $data['ban'] = str_replace('.', '', $td[2]->plaintext) / 10;
                     $data['data'] = '';
                     $data['donvi'] = $donvi;
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-
             }
             return 'Pnj Updated';
-
         }
 
         return 'html null';
-
     }
     public function phuquy($html, $dom)
     {
@@ -365,20 +353,18 @@ class GoldExchanges extends Command
 
             $hanoi  = $html->find('table.goldprice-view tr', 0);
             $tbodys = $html->find('table.goldprice-view tbody tr');
-            $OilCron = DB::table('tygiavang_cron')->where('slug','=','phu-quy')->orderBy('id','DESC')->first();
+            $OilCron = DB::table('tygiavang_cron')->where('slug', '=', 'phu-quy')->orderBy('id', 'DESC')->first();
 
-            $insert_id = $this->insertCron($updated, 'gold.phuquy.com.vn','phu-quy');
+            $insert_id = $this->insertCron($updated, 'gold.phuquy.com.vn', 'phu-quy');
 
             $_SESSION['row_loai'] = '';
-            foreach($tbodys as $index=>$tbody)
-            {
+            foreach ($tbodys as $index => $tbody) {
                 $code = $dom->str_get_html($tbody->innertext);
                 $code = $code->find('td');
 
-                if( count($code) == 4 )
-                {
-                    if( $code[0]->plaintext == 'Loại' ) continue;
-                    if( $index == 0) $_SESSION['row_loai'] = 'Hà Nội';
+                if (count($code) == 4) {
+                    if ($code[0]->plaintext == 'Loại') continue;
+                    if ($index == 0) $_SESSION['row_loai'] = 'Hà Nội';
 
                     $data['cron_id'] = $insert_id;
                     $data['tieude'] = $code[1]->plaintext;
@@ -389,27 +375,23 @@ class GoldExchanges extends Command
                     $data['ban'] = str_replace('.', '', $code[3]->plaintext) / 1000;
                     $data['data'] = '';
                     $data['donvi'] = 'Đồng/Chỉ';
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-                if( count($code) == 1 )
-                {
+                if (count($code) == 1) {
                     $_SESSION['row_loai'] = $code[0]->plaintext;
-
                 }
-                if( count($code) == 3 )
-                {
+                if (count($code) == 3) {
                     $data['cron_id'] = $insert_id;
                     $data['tieude'] = $code[0]->plaintext;
                     $data['slug'] = "pnj";
                     $data['loai'] = $code[0]->plaintext;
                     $data['tinhthanh'] = $_SESSION['row_loai'];
-                    $data['mua']  = str_replace('.', '',$code[1]->plaintext) / 1000;
-                    $data['ban'] = str_replace('.', '',$code[2]->plaintext) / 1000;
+                    $data['mua']  = str_replace('.', '', $code[1]->plaintext) / 1000;
+                    $data['ban'] = str_replace('.', '', $code[2]->plaintext) / 1000;
                     $data['data'] = '';
                     $data['donvi'] = 'Đồng/Chỉ';
-                    $this->insertVang($data,$OilCron);
+                    $this->insertVang($data, $OilCron);
                 }
-
             }
             return 'Phuquy updated!';
         }
@@ -422,41 +404,41 @@ class GoldExchanges extends Command
     {
 
         if ($html) {
-            $updated = $html->find('span.update-time',0);
+            $updated = $html->find('span.update-time', 0);
             $updated = str_replace('Cập nhập lúc: ', '', $updated->plaintext);
 
-            $OilCron = DB::table('tygiavang_cron')->where('slug','=','doji')->orderBy('id','DESC')->first();
+            $OilCron = DB::table('tygiavang_cron')->where('slug', '=', 'doji')->orderBy('id', 'DESC')->first();
             // Doji thi insert o day luon
 
-            $insert_id = $this->insertCron($updated, 'giavang.doji.com.vn','doji');
+            $insert_id = $this->insertCron($updated, 'giavang.doji.com.vn', 'doji');
 
             $listVang = [1, 109, 108, 666, 670];
-            foreach ($listVang as $id)
-            {
-                $m1 = $dom->file_get_html('http://giavang.doji.vn/sites/default/files/data/hienthi/vungmien_'.$id.'.dat');
-                $tinhthanh = $m1->find('.title_bang',0);
+            foreach ($listVang as $id) {
+                $m1 = $dom->file_get_html('http://giavang.doji.vn/sites/default/files/data/hienthi/vungmien_' . $id . '.dat');
+                $tinhthanh = $m1->find('.title_bang', 0);
                 $tinhthanh = $tinhthanh->plaintext;
                 $trs = $m1->find('.goldprice-view tbody tr');
-                foreach( $trs as $td )
-                {
+                foreach ($trs as $td) {
                     //$node = $td->
                     $node =  str_replace(' class="label"', '', $td->innertext);
                     $node =  str_replace('</td>', '', $node);
                     $node = explode('<td>', $node);
-                    $oidData = DB::table('tygiavang_data')->where('slug','=','doji')->where('cron_id','=', $OilCron->id)->get();
-                    foreach($oidData as $value){
-                        if($value->loai === $node[1] && $value->tinhthanh === $tinhthanh){
-                            if((float)$node[2] > 0 || (float)$node[2] != null){
-                                $tyle_mua = 100 - (($value->mua / (float)$node[2]) * 100);
-                            }else{
+                    $oidData = DB::table('tygiavang_data')->where('slug', '=', 'doji')->where('cron_id', '=', $OilCron->id)->get();
+                    foreach ($oidData as $value) {
+                        if ($value->loai === $node[1] && $value->tinhthanh === $tinhthanh) {
+                            if ((float) $node[2] > 0 || (float) $node[2] != null) {
+                                $tyle_mua = 100 - (($value->mua / (float) $node[2]) * 100);
+                            } else {
                                 $tyle_mua = 0;
                             }
-                            if((float)$node[3] > 0 || (float)$node[3] != null){
-                                $tyle_ban = 100 - (($value->ban / (float)$node[3]) * 100);
-                            }else{
+                            if ((float) $node[3] > 0 || (float) $node[3] != null) {
+                                $tyle_ban = 100 - (($value->ban / (float) $node[3]) * 100);
+                            } else {
                                 $tyle_ban = 0;
                             }
-                        }else{continue;}
+                        } else {
+                            continue;
+                        }
                     }
                     DB::table('tygiavang_data')->insert([
                         'cron_id' => $insert_id,
@@ -467,7 +449,7 @@ class GoldExchanges extends Command
                         'mua'  => (float) $node[2],
                         'tyle_mua' => (float) $tyle_mua,
                         'ban'  => (float) $node[3],
-                        'tyle_ban'=> (float) $tyle_ban,
+                        'tyle_ban' => (float) $tyle_ban,
                         'data' => '',
                         'donvi' => 'Nghìn/Lượng'
                     ]);
@@ -489,37 +471,35 @@ class GoldExchanges extends Command
         // SJC cung insert o day luon
 
 
-        $OilCron = DB::table('tygiavang_cron')->where('slug','=','sjc')->orderBy('id','DESC')->first();
+        $OilCron = DB::table('tygiavang_cron')->where('slug', '=', 'sjc')->orderBy('id', 'DESC')->first();
 
         $citys = $xml->ratelist->city;
 
-        $insert_id = $this->insertCron($ratelist['updated'], 'sjc.com.vn','sjc');
+        $insert_id = $this->insertCron($ratelist['updated'], 'sjc.com.vn', 'sjc');
 
-        foreach( $citys as $city )
-        {
+        foreach ($citys as $city) {
 
-            foreach (  $city->item as $item )
-            {
-                $oidData = DB::table('tygiavang_data')->where('slug','=','sjc')->where('cron_id','=', $OilCron->id)->count();
-                if($oidData> 0){
+            foreach ($city->item as $item) {
+                $oidData = DB::table('tygiavang_data')->where('slug', '=', 'sjc')->where('cron_id', '=', $OilCron->id)->count();
+                if ($oidData > 0) {
                     $tyle_mua = 0;
                     $tyle_ban = 0;
-                    $oidData = DB::table('tygiavang_data')->where('slug','=','sjc')->where('cron_id','=', $OilCron->id)->get();
+                    $oidData = DB::table('tygiavang_data')->where('slug', '=', 'sjc')->where('cron_id', '=', $OilCron->id)->get();
 
-                    foreach($oidData as $value){
+                    foreach ($oidData as $value) {
 
-                        if($value->loai === $item['type'] && $value->tinhthanh === $city['name']){
-                            if($item['buy'] != null || $item['buy'] > 0){
+                        if ($value->loai === $item['type'] && $value->tinhthanh === $city['name']) {
+                            if ($item['buy'] != null || $item['buy'] > 0) {
                                 $tyle_mua = 100 - (($value->mua / ($item['buy'] * 100)) * 100);
                             }
-                            if($item['sell'] != null|| $item['sell'] > 0){
+                            if ($item['sell'] != null || $item['sell'] > 0) {
                                 $tyle_ban = 100 - (($value->ban / ($item['sell'] * 100)) * 100);
                             }
-                        }else{
+                        } else {
                             continue;
                         }
                     }
-                }else{
+                } else {
                     $tyle_mua = 0;
                     $tyle_ban = 0;
                 }
@@ -535,13 +515,13 @@ class GoldExchanges extends Command
                     'mua'  => $buy * 100,
                     'tyle_mua' => $tyle_mua,
                     'ban'  => $sell * 100,
-                    'tyle_ban'=> $tyle_ban,
+                    'tyle_ban' => $tyle_ban,
                     'data' => '',
-                    'donvi'=> 'đồng/lượng'
+                    'donvi' => 'đồng/lượng'
                 ]);
-                if($sjcInsert){
+                if ($sjcInsert) {
                     echo "Update SJC success";
-                }else{
+                } else {
                     echo "Update SJC failed";
                 }
             }
@@ -563,24 +543,20 @@ class GoldExchanges extends Command
                 ->where('cron_key', $updated)
                 ->where('nguon', 'webgia.com/gia-vang/phu-quy')
                 ->first();
-            if( ! $check )
-            {
-                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/phu-quy','phuquy_webgia');
+            if (!$check) {
+                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/phu-quy', 'phuquy_webgia');
                 $table = $html->find(".table-responsive table tbody tr");
-                foreach( $table as $tr )
-                {
+                foreach ($table as $tr) {
 
                     $tds = $dom->str_get_html($tr->innertext);
                     $count = count($tds->find('td'));
-                    if( $count == 4 )
-                    {
+                    if ($count == 4) {
                         $title = $tds->find('td', 0);
                         $_SESSION['current_title'] = $title->plaintext;
                         $loai = $tds->find('td', 1);
                         $mua = $tds->find('td', 2);
                         $ban = $tds->find('td', 3);
-
-                    }else{
+                    } else {
                         $loai = $tds->find('td', 0);
                         $mua = $tds->find('td', 1);
                         $ban = $tds->find('td', 2);
@@ -588,7 +564,7 @@ class GoldExchanges extends Command
 
                     DB::table('tygiavang_data')->insert([
                         'cron_id' => $insert_id,
-                        'tieude'  => isset( $_SESSION['current_title'] ) ? $_SESSION['current_title'] : '',
+                        'tieude'  => isset($_SESSION['current_title']) ? $_SESSION['current_title'] : '',
                         'slug' => 'phu_quy_webgia',
                         'loai'    => $loai->plaintext,
                         'tinhthanh' => $loai->plaintext,
@@ -614,24 +590,20 @@ class GoldExchanges extends Command
                 ->where('cron_key', $updated)
                 ->where('nguon', 'webgia.com/gia-vang/pnj')
                 ->first();
-            if( ! $check )
-            {
-                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/pnj','pnj_webgia');
+            if (!$check) {
+                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/pnj', 'pnj_webgia');
                 $table = $html->find(".table-responsive table tbody tr");
-                foreach( $table as $tr )
-                {
+                foreach ($table as $tr) {
 
                     $tds = $dom->str_get_html($tr->innertext);
                     $count = count($tds->find('td'));
-                    if( $count >= 4 )
-                    {
+                    if ($count >= 4) {
                         $title = $tds->find('td', 0);
                         $_SESSION['current_title'] = $title->plaintext;
                         $loai = $tds->find('td', 1);
                         $mua = $tds->find('td', 2);
                         $ban = $tds->find('td', 3);
-
-                    }else{
+                    } else {
                         $loai = $tds->find('td', 0);
                         $mua = $tds->find('td', 1);
                         $ban = $tds->find('td', 2);
@@ -639,7 +611,7 @@ class GoldExchanges extends Command
 
                     DB::table('tygiavang_data')->insert([
                         'cron_id' => $insert_id,
-                        'tieude'  => isset( $_SESSION['current_title'] ) ? $_SESSION['current_title'] : '',
+                        'tieude'  => isset($_SESSION['current_title']) ? $_SESSION['current_title'] : '',
                         'slug' => 'pnj_webgia',
                         'loai'    => $loai->plaintext,
                         'tinhthanh' => $loai->plaintext,
@@ -665,24 +637,20 @@ class GoldExchanges extends Command
                 ->where('cron_key', $updated)
                 ->where('nguon', 'webgia.com/gia-vang/bao-tin-minh-chau')
                 ->first();
-            if( ! $check )
-            {
-                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/bao-tin-minh-chau','minhchau_webgia');
+            if (!$check) {
+                $insert_id = $this->insertCron($updated, 'webgia.com/gia-vang/bao-tin-minh-chau', 'minhchau_webgia');
                 $table = $html->find(".table-responsive table tbody tr");
-                foreach( $table as $tr )
-                {
+                foreach ($table as $tr) {
 
                     $tds = $dom->str_get_html($tr->innertext);
                     $count = count($tds->find('td'));
-                    if( $count == 4 )
-                    {
+                    if ($count == 4) {
                         $title = $tds->find('td', 0);
                         $_SESSION['current_title'] = $title->plaintext;
                         $loai = $tds->find('td', 1);
                         $mua = $tds->find('td', 2);
                         $ban = $tds->find('td', 3);
-
-                    }else{
+                    } else {
                         $loai = $tds->find('td', 0);
                         $mua = $tds->find('td', 1);
                         $ban = $tds->find('td', 2);
@@ -690,7 +658,7 @@ class GoldExchanges extends Command
 
                     DB::table('tygiavang_data')->insert([
                         'cron_id' => $insert_id,
-                        'tieude'  => isset( $_SESSION['current_title'] ) ? $_SESSION['current_title'] : '',
+                        'tieude'  => isset($_SESSION['current_title']) ? $_SESSION['current_title'] : '',
                         'slug' => 'btmc_webgia',
                         'loai'    => $loai->plaintext,
                         'tinhthanh' => $loai->plaintext,
@@ -706,159 +674,162 @@ class GoldExchanges extends Command
     }
 
 
-    protected function sjcEximbank($html, $dom){
+    protected function sjcEximbank($html, $dom)
+    {
 
-        if($html){
-            $mua = $html->find('span#GoldRateRepeater_lblCSHBUYRT_0',0);
-            $ban = $html->find('span#GoldRateRepeater_lblCSHSELLRT_0',0);
+        if ($html) {
+            $mua = $html->find('span#GoldRateRepeater_lblCSHBUYRT_0', 0);
+            $ban = $html->find('span#GoldRateRepeater_lblCSHSELLRT_0', 0);
 
-            $insert_id = $this->insertCron("SJCEximbank", 'eximbank.com.vn','SJCEximbank');
+            $insert_id = $this->insertCron("SJCEximbank", 'eximbank.com.vn', 'SJCEximbank');
 
             $insertDB = DB::table('tygiavang_data')->insert([
-                'cron_id'=>$insert_id,
-                'tieude'=>'EximBank',
-                'slug'=>'eximbank',
-                'loai'=>'sjc',
-                'tinhthanh'=>'bank',
-                'mua'=>str_replace(',','',strip_tags($mua)),
-                'tyle_mua'=>null,
-                'ban'=>str_replace(',','',strip_tags($ban)),
-                'tyle_ban'=>null,
-                'data'=>' ',
-                'donvi'=>'VND/chỉ'
+                'cron_id' => $insert_id,
+                'tieude' => 'EximBank',
+                'slug' => 'eximbank',
+                'loai' => 'sjc',
+                'tinhthanh' => 'bank',
+                'mua' => str_replace(',', '', strip_tags($mua)),
+                'tyle_mua' => null,
+                'ban' => str_replace(',', '', strip_tags($ban)),
+                'tyle_ban' => null,
+                'data' => ' ',
+                'donvi' => 'VND/chỉ'
             ]);
-            if($insertDB){
+            if ($insertDB) {
                 echo "success \n ";
-            }else{
+            } else {
                 echo "Success SJC Eximbank \n ";
             }
         }
     }
 
-    protected function sjcVietinbank($html, $dom){
+    protected function sjcVietinbank($html, $dom)
+    {
 
-        if($html){
-            $container = $html->find('div.container',5);
+        if ($html) {
+            $container = $html->find('div.container', 5);
 
-            $mua = $container->find('div.num_price',0);
-            $ban = $container->find('div.num_price',1);
+            $mua = $container->find('div.num_price', 0);
+            $ban = $container->find('div.num_price', 1);
 
-            $insert_id = $this->insertCron("SJCVietinBank", 'vietinbankgold.vn/gia-vang.html','SJCVietinBank');
+            $insert_id = $this->insertCron("SJCVietinBank", 'vietinbankgold.vn/gia-vang.html', 'SJCVietinBank');
 
             $insertDB = DB::table('tygiavang_data')->insert([
-                'cron_id'=>$insert_id,
-                'tieude'=>'VietinBank',
-                'slug'=>'vietin',
-                'loai'=>'sjc',
-                'tinhthanh'=>'bank',
-                'mua'=>floatval(str_replace(',','',strip_tags($mua))),
-                'tyle_mua'=>null,
-                'ban'=>floatval(str_replace(',','',strip_tags($ban))),
-                'tyle_ban'=>null,
-                'data'=>' ',
-                'donvi'=>'VND/lượng'
+                'cron_id' => $insert_id,
+                'tieude' => 'VietinBank',
+                'slug' => 'vietin',
+                'loai' => 'sjc',
+                'tinhthanh' => 'bank',
+                'mua' => floatval(str_replace(',', '', strip_tags($mua))),
+                'tyle_mua' => null,
+                'ban' => floatval(str_replace(',', '', strip_tags($ban))),
+                'tyle_ban' => null,
+                'data' => ' ',
+                'donvi' => 'VND/lượng'
             ]);
-            if($insertDB){
+            if ($insertDB) {
                 echo "success SJC VietinBank \n ";
-            }else{
+            } else {
                 echo "Error SJC VietinBank \n ";
             }
         }
     }
 
-    protected function sjcTechcombank($html, $dom){
+    protected function sjcTechcombank($html, $dom)
+    {
 
-        if($html){
-            $table = $html->find('table',1);
-            $tr = $table->find('tr',1);
-            $mua = $tr->find('td',1);
-            $ban = $tr->find('td',2);
-            $insert_id = $this->insertCron("SJCTechcombank", 'techcombank.com.vn','SJCTechcombank');
+        if ($html) {
+            $table = $html->find('table', 1);
+            $tr = $table->find('tr', 1);
+            $mua = $tr->find('td', 1);
+            $ban = $tr->find('td', 2);
+            $insert_id = $this->insertCron("SJCTechcombank", 'techcombank.com.vn', 'SJCTechcombank');
 
             $insertDB = DB::table('tygiavang_data')->insert([
-                'cron_id'=>$insert_id,
-                'tieude'=>'TechcomBank',
-                'slug'=>'techcom',
-                'loai'=>'sjc',
-                'tinhthanh'=>'bank',
-                'mua'=>str_replace(',','',str_replace('&nbsp;','',strip_tags($mua))),
-                'tyle_mua'=>null,
-                'ban'=>str_replace(',','',str_replace('&nbsp;','',strip_tags($ban))),
-                'tyle_ban'=>null,
-                'data'=>' ',
-                'donvi'=>'VND/chỉ'
+                'cron_id' => $insert_id,
+                'tieude' => 'TechcomBank',
+                'slug' => 'techcom',
+                'loai' => 'sjc',
+                'tinhthanh' => 'bank',
+                'mua' => str_replace(',', '', str_replace('&nbsp;', '', strip_tags($mua))),
+                'tyle_mua' => null,
+                'ban' => str_replace(',', '', str_replace('&nbsp;', '', strip_tags($ban))),
+                'tyle_ban' => null,
+                'data' => ' ',
+                'donvi' => 'VND/chỉ'
             ]);
-            if($insertDB){
+            if ($insertDB) {
                 echo "success SJC Techcombank \n ";
-            }else{
+            } else {
                 echo "Errors SJC \n ";
             }
         }
     }
 
-    protected function sjcSacombank($html, $dom){
+    protected function sjcSacombank($html, $dom)
+    {
 
-        if($html){
-            $table = $html->find('div#tnbGoldPrice',0);
-            $tr = $table->find('tr',1);
+        if ($html) {
+            $table = $html->find('div#tnbGoldPrice', 0);
+            $tr = $table->find('tr', 1);
 
-            $mua = $tr->find('td',1);
-            $ban = $tr->find('td',2);
+            $mua = $tr->find('td', 1);
+            $ban = $tr->find('td', 2);
 
-            $insert_id = $this->insertCron("SJCSacombank", 'sacombank.com.vn','SJCSacombank');
+            $insert_id = $this->insertCron("SJCSacombank", 'sacombank.com.vn', 'SJCSacombank');
 
             $insertDB = DB::table('tygiavang_data')->insert([
-                'cron_id'=>$insert_id,
-                'tieude'=>'SacomBank',
-                'slug'=>'sacombank',
-                'loai'=>'sjc',
-                'tinhthanh'=>'bank',
-                'mua'=>str_replace('.','',str_replace('&nbsp;','',strip_tags($mua))),
-                'tyle_mua'=>null,
-                'ban'=>str_replace('.','',str_replace('&nbsp;','',strip_tags($ban))),
-                'tyle_ban'=>null,
-                'data'=>' ',
-                'donvi'=>'VND/chỉ'
+                'cron_id' => $insert_id,
+                'tieude' => 'SacomBank',
+                'slug' => 'sacombank',
+                'loai' => 'sjc',
+                'tinhthanh' => 'bank',
+                'mua' => str_replace('.', '', str_replace('&nbsp;', '', strip_tags($mua))),
+                'tyle_mua' => null,
+                'ban' => str_replace('.', '', str_replace('&nbsp;', '', strip_tags($ban))),
+                'tyle_ban' => null,
+                'data' => ' ',
+                'donvi' => 'VND/chỉ'
             ]);
-            if($insertDB){
+            if ($insertDB) {
                 echo "success SJC Sacombank \n ";
-            }else{
+            } else {
                 echo "Error SJC Sacombankn \n ";
             }
-
         }
     }
 
-    protected function giavangtg($html, $dom){
+    protected function giavangtg($html, $dom)
+    {
 
-        if($html){
-            $table = $html->find('div#live-gold-quotes table',0);
-            $tr = $table->find('tr',1);
-            $mua = $tr->find('td',0);
-            $ban = $tr->find('td',1);
-            $tylemua = str_replace('+','',strip_tags($tr->find('td',3)));
+        if ($html) {
+            $table = $html->find('div#live-gold-quotes table', 0);
+            $tr = $table->find('tr', 1);
+            $mua = $tr->find('td', 0);
+            $ban = $tr->find('td', 1);
+            $tylemua = str_replace('+', '', strip_tags($tr->find('td', 3)));
             echo $tylemua;
-            $insert_id = $this->insertCron("GiaVangTG", 'kitco.com','GiaVangTheGioi');
+            $insert_id = $this->insertCron("GiaVangTG", 'kitco.com', 'GiaVangTheGioi');
 
             $insertGiaVang = DB::table('tygiavang_data')->insert([
-                'cron_id'=>$insert_id,
-                'tieude'=>'kitco',
-                'slug'=>'thegioi',
-                'loai'=>'sjc',
-                'tinhthanh'=>'thegioi',
-                'mua'=>str_replace(',','',str_replace('&nbsp;','',strip_tags($mua))),
-                'tyle_mua'=>$tylemua,
-                'ban'=>str_replace(',','',str_replace('&nbsp;','',strip_tags($ban))),
-                'tyle_ban'=>null,
-                'data'=>' ',
-                'donvi'=>'USD/chỉ'
+                'cron_id' => $insert_id,
+                'tieude' => 'kitco',
+                'slug' => 'thegioi',
+                'loai' => 'sjc',
+                'tinhthanh' => 'thegioi',
+                'mua' => str_replace(',', '', str_replace('&nbsp;', '', strip_tags($mua))),
+                'tyle_mua' => $tylemua,
+                'ban' => str_replace(',', '', str_replace('&nbsp;', '', strip_tags($ban))),
+                'tyle_ban' => null,
+                'data' => ' ',
+                'donvi' => 'USD/chỉ'
             ]);
-            if($insertGiaVang){
+            if ($insertGiaVang) {
                 echo "success GiaVang TheGioi \n ";
-            }else{
+            } else {
                 echo "Errors GiaVang theGioi \n ";
             }
         }
-
     }
 }

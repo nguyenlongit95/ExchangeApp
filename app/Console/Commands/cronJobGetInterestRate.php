@@ -9,14 +9,15 @@ use App\Helpers\SimpleHtmlDom;
 use Carbon\Carbon;
 use App\Models\LaiSuat;
 use App\Helpers\ChangeText;
-class getInterestRate extends Command
+
+class cronJobGetInterestRate extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'getInterestRate:getInterestRate';
+    protected $signature = 'cronJob:getInterestRate';
 
     /**
      * The console command description.
@@ -60,14 +61,15 @@ class getInterestRate extends Command
         }
         $this->vtb($htmlVTB);
 
-       $urlSHB = "https://www.shb.com.vn/category/lien-ket-nhanh/lai-suat-tiet-kiem/";
-       try{
-           $htmlSHB = $SimpleHTMLDOM->file_get_html($urlSHB);
-       }catch(\Exception $e){
-           $htmlSHB = null;
-       }
+    //    $urlSHB = "https://www.shb.com.vn/category/lien-ket-nhanh/lai-suat-tiet-kiem/";
+    //    try{
+    //        $htmlSHB = $SimpleHTMLDOM->file_get_html($urlSHB);
+    //    }catch(\Exception $e){
+    //        $htmlSHB = null;
+    //    }
 
-        $this->shb($SimpleHTMLDOM);
+        // $this->shb($SimpleHTMLDOM);
+
         $this->bidv();
 
         $urlDONGA = "http://kinhdoanh.dongabank.com.vn/widget/temp/-/DTSCDongaBankIView_WAR_DTSCDongaBankIERateportlet?type=tktt-vnd";
