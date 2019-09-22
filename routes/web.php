@@ -325,6 +325,7 @@ Route::post('uploadVerificationFile','adminController@uploadVerificationFile');
 Route::get('verification/{filename}','adminController@verification');
 
 
-Route::group(['prefix'=>'frontend', 'namespace'=>$namespace], function() {
+Route::group(['namespace'=>$namespace], function() {
 // Route web client
+    Route::get('index', 'IndexController@index');
 });
