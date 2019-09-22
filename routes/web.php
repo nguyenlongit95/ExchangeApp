@@ -2,6 +2,8 @@
 /*
  * Route test demo
  * */
+$namespace = 'Web';
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -321,3 +323,8 @@ Route::get('createCart','adminController@createCart');
 
 Route::post('uploadVerificationFile','adminController@uploadVerificationFile');
 Route::get('verification/{filename}','adminController@verification');
+
+
+Route::group(['prefix'=>'frontend', 'namespace'=>$namespace], function() {
+// Route web client
+});
