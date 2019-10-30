@@ -18,7 +18,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-// Build route APIs demo
 
 Route::post('login','UserController@login');
 Route::post('register','UserController@register');
@@ -27,5 +26,5 @@ Route::group(['middleware'=>'auth:api'], function(){
 });
 
 Route::group(['prefix'=>'v1', 'namespace'=>$namespace], function() {
-    Route::get('test', 'ExchangeController@index');
+    Route::get('get-exchange', 'ExchangeController@index');
 });

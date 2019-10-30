@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Email;
 use DB;
 use Illuminate\Mail\Mailer;
-use App\Repositories\Email\EmailRepositoryInterface;
+use App\Repositories\Email\ExchangeRepositoryInterface;
 use Mail;
 class EmailController extends Controller
 {
@@ -21,7 +21,7 @@ class EmailController extends Controller
         'sendmail' => '/usr/sbin/sendmail -bs'
     ];
 
-    public function __construct(EmailRepositoryInterface $emailRepository)
+    public function __construct(ExchangeRepositoryInterface $emailRepository)
     {
         $this->emailRepositories = $emailRepository;
     }

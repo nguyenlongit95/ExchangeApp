@@ -2,11 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\BankInfo;
+use App\Models\NgoaiTe;
+use App\Models\NgoaiTeCron;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Repositories\Exchanges\ExchangeRepositoryInterface;
 
 class ExchangeController extends Controller
 {
+    private $exchange;
+
+    public function __construct(ExchangeRepositoryInterface $exchange)
+    {
+        $this->exchange = $exchange;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,8 +25,24 @@ class ExchangeController extends Controller
      */
     public function index()
     {
-        //
-        return response()->json(['message'=>'Test api success'], 200);
+        // Get Bank and Currency
+        $bankInfo = BankInfo::where('active', 1)->orderBy('sort', 'ASC')->get();
+        if (!$bankInfo) {
+            return response()->json(["message" => "Cannot find the bank"], 422);
+        }
+        // Ngoai Te Cron
+        $ngoaiTeCron = NgoaiTeCron::where('cronkey','!=', null)->orderBy('id', 'DESC')->first();
+
+        $ngoaiTe = NgoaiTe::where('cron_id', $ngoaiTeCron->id)->where('default', 0)->orderBy('id', 'DESC')->get();
+        if (!$ngoaiTe) {
+            return response(["message" => "Data not found"], 403);
+        }
+        $mergeData = $this->exchange->mergeExchange($bankInfo, $ngoaiTe);
+        if (!$mergeData) {
+            return response()->json(["message" => "Data errors"], 422);
+        }
+
+        return response()->json($mergeData, 200);
     }
 
     /**

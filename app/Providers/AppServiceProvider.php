@@ -104,8 +104,8 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Seo\SeoEloquentRepository::class
         );
         $this->app->bind(
-            \App\Repositories\Email\EmailRepositoryInterface::class,
-            \App\Repositories\Email\EmailEloquentRepository::class
+            \App\Repositories\Email\ExchangeRepositoryInterface::class,
+            \App\Repositories\Email\ExchangeEloquentRepository::class
         );
         $this->app->bind(
             \App\Repositories\Email\CurrencyRepositoryInterface::class,
@@ -117,6 +117,10 @@ class AppServiceProvider extends ServiceProvider
         );
         $this->app->bind(
             \App\Factory\Paygates\PaygateFactory::class
+        );
+        $this->app->bind(
+            \App\Repositories\Exchanges\ExchangeRepositoryInterface::class,
+            \App\Repositories\Exchanges\ExchangeEloquentRepository::class
         );
     }
 }

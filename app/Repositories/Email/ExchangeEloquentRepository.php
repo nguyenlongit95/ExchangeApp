@@ -9,7 +9,7 @@ use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 use App\Email;
 use Mail;
-class EmailEloquentRepository extends EloquentRepository implements EmailRepositoryInterface{
+class ExchangeEloquentRepository extends EloquentRepository implements ExchangeRepositoryInterface{
 
     public function configEmail($id,$State)
     {
