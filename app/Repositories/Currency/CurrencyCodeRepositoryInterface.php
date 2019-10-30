@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Contact;
 
-interface CurrencyRepositoryInterface{
+interface CurrencyRepositoryInterface
+{
 }
 
 ?>

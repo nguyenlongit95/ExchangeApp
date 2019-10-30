@@ -6,7 +6,9 @@ namespace App\Repositories\Eloquent;
  * Interface này sẽ khai báo các phương thức chung mà tất cả các đối tượng đều sử dụng
  * Tham số đầu vào và kiểu của phương thức được định nghĩa sẵn
  * */
-interface RepositoryInterface{
+
+interface RepositoryInterface
+{
     /*
      * Khai báo các phương thức tại đây
      * Tham số đầu vào cũng được định nghĩa tại đây

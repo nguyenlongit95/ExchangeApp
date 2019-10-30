@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Contact;
 
-interface ContactRepositoryInterface{
+interface ContactRepositoryInterface
+{
     public function changeState($id, $State);
 }
 

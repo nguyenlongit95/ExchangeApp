@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\InfoOfPage;
 
-interface InfoOfPageRepositoryInterface{
+interface InfoOfPageRepositoryInterface
+{
 }
 
 ?>

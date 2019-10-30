@@ -17,6 +17,7 @@ class ArticleController extends Controller
      * */
     // Đây là biến trung gian để gọi đến Interface
     protected $ArticleRepository;
+
     // Phương thức khởi tạo để gọi đến interface, Tham số đầu vào chính là interface
     public function __construct(ArticleRepositoryInterface $ArticleRepository)
     {
@@ -31,57 +32,62 @@ class ArticleController extends Controller
      * delete
      * restore
      * */
-    public function index(){
+    public function index()
+    {
         $Articles = $this->ArticleRepository->getAll(30);
-        return view('admin.Article.index', ['Articles'=>$Articles]);
+        return view('admin.Article.index', ['Articles' => $Articles]);
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $CategoryBlogs = $this->CategoryRepository->find($id);
         return $CategoryBlogs;
     }
 
-    public function getStore(){
+    public function getStore()
+    {
         return view('admin.Article.create');
     }
 
-    public function store(Request $request){
-        if($request->hasFile("images")){
+    public function store(Request $request)
+    {
+        if ($request->hasFile("images")) {
             $file = $request->file("images");
             $extFile = $file->getClientOriginalExtension();
-            if($extFile == "jpg" || $extFile == "png" || $extFile == "jpeg"){
+            if ($extFile == "jpg" || $extFile == "png" || $extFile == "jpeg") {
                 $name = str_random(5) . $file->getClientOriginalName();
-                if($file->move("upload/Articles/",$name)){
+                if ($file->move("upload/Articles/", $name)) {
                     $data = array(
-                        "title"=>$request->title,
-                        "slug"=>$request->slug,
-                        "info"=>$request->info,
-                        "images"=>$name,
-                        "details"=>$request->details,
-                        "author"=>$request->author,
-                        "linked"=>$request->linked,
-                        "status"=>$request->status
+                        "title" => $request->title,
+                        "slug" => $request->slug,
+                        "info" => $request->info,
+                        "images" => $name,
+                        "details" => $request->details,
+                        "author" => $request->author,
+                        "linked" => $request->linked,
+                        "status" => $request->status
                     );
-                }else{
-                    return redirect()->back()->with('thong_bao','Upload image fail, please check folder system');
+                } else {
+                    return redirect()->back()->with('thong_bao', 'Upload image fail, please check folder system');
                 }
-            }else{
-                return redirect()->back()->with('thong_bao','Image false, please check extendtion file');
+            } else {
+                return redirect()->back()->with('thong_bao', 'Image false, please check extendtion file');
             }
-        }else{
-            return redirect()->back()->with('thong_bao','Please chose a image');
+        } else {
+            return redirect()->back()->with('thong_bao', 'Please chose a image');
         }
         $Article = $this->ArticleRepository->create($data);
-        if($Article == true){
-            return redirect('admin/Article/Articles')->with('thong_bao','Add new item success');
-        }else{
-            return redirect()->back()->with('thong_bao','Add new item failed');
+        if ($Article == true) {
+            return redirect('admin/Article/Articles')->with('thong_bao', 'Add new item success');
+        } else {
+            return redirect()->back()->with('thong_bao', 'Add new item failed');
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $deleteImage = $this->ArticleRepository->deleteImage($id);
-        if($request->hasFile("images")) {
+        if ($request->hasFile("images")) {
             $file = $request->file("images");
             $name = str_random(3) . "_" . $file->getClientOriginalName();
             if ($file->move("upload/Articles/", $name)) {
@@ -95,10 +101,10 @@ class ArticleController extends Controller
                     "linked" => $request->linked,
                     "status" => $request->status
                 );
-            }else{
-                return redirect()->back()->with("thong_bao","Upload file fail, please check system");
+            } else {
+                return redirect()->back()->with("thong_bao", "Upload file fail, please check system");
             }
-        }else{
+        } else {
             $data = array(
                 "title" => $request->title,
                 "slug" => $request->slug,
@@ -109,22 +115,23 @@ class ArticleController extends Controller
                 "status" => $request->status
             );
         }
-        $CategoryBlogs = $this->ArticleRepository->update($data,$id);
-        if($CategoryBlogs == true){
-            return redirect()->back()->with('thong_bao','Update an item success!');
-        }else{
-            return redirect()->back()->with('thong_bao','Update an item failed!');
+        $CategoryBlogs = $this->ArticleRepository->update($data, $id);
+        if ($CategoryBlogs == true) {
+            return redirect()->back()->with('thong_bao', 'Update an item success!');
+        } else {
+            return redirect()->back()->with('thong_bao', 'Update an item failed!');
         }
 
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $ArticleRepository = $this->ArticleRepository->delete($id);
         $deleteImageOfArticle = $this->ArticleRepository->deleteImage($id);
-        if($ArticleRepository == true && $deleteImageOfArticle == 1){
-            return redirect('admin/Categories/CategoriesBlog')->with('thong_bao','Delete an item success!');
-        }else{
-            return redirect('admin/Categories/CategoriesBlog')->with('thong_bao','Delete an item failed');
+        if ($ArticleRepository == true && $deleteImageOfArticle == 1) {
+            return redirect('admin/Categories/CategoriesBlog')->with('thong_bao', 'Delete an item success!');
+        } else {
+            return redirect('admin/Categories/CategoriesBlog')->with('thong_bao', 'Delete an item failed');
         }
     }
 
@@ -132,15 +139,17 @@ class ArticleController extends Controller
      * Các phương thức mở rộng khác được viết ở đây
      * Phương thức getUpdate
      * */
-    public function getUpdate($id){
+    public function getUpdate($id)
+    {
         $Article = Article::findOrFail($id);
-        return view('admin.Article.update',['Article'=>$Article]);
+        return view('admin.Article.update', ['Article' => $Article]);
     }
 
     /**
      * Ajax cho Slug
      * */
-    public function postAjaxSlug(Request $request){
+    public function postAjaxSlug(Request $request)
+    {
         return changeTitle($request->Title);
     }
 }

@@ -11,7 +11,8 @@ class tokenAPIController extends Controller
      * Phương thức ở đây sẽ tùy chỉnh theo cấu hình và chức năng của từng APIs
      * Xây dựng sau
      * */
-    public function index(){
+    public function index()
+    {
         return view("admin.TokenAPIs.index");
     }
 }

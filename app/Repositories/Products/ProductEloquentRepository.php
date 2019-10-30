@@ -12,7 +12,8 @@ use App\Rattings;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 
-class ProductEloquentRepository extends EloquentRepository implements ProductRepositoryInterface{
+class ProductEloquentRepository extends EloquentRepository implements ProductRepositoryInterface
+{
     /*
      * Tại đây ta sẽ khai báo chi tiết các phương thức đặc biệt
      * Ta khai báo chi tiết cho phương thức getModel
@@ -24,43 +25,50 @@ class ProductEloquentRepository extends EloquentRepository implements ProductRep
      * Lấy hình ảnh của sản phẩm
      * Lấy model
      * */
-    public function updateImage($idImage){
+    public function updateImage($idImage)
+    {
 
     }
 
-    public function deleteImage($idImage){
+    public function deleteImage($idImage)
+    {
 
     }
 
-    public function getCategory(){
+    public function getCategory()
+    {
         $CategoriesProduct = CategoriesProducts::all();
         return $CategoriesProduct;
     }
 
-    public function search($keySearch){
+    public function search($keySearch)
+    {
 
     }
 
-    public function getInfo($id){
+    public function getInfo($id)
+    {
         $ProductInfo = Products::SELECT('info')
-            ->WHERE('id','=',$id)
+            ->WHERE('id', '=', $id)
             ->get();
-        if($ProductInfo){
+        if ($ProductInfo) {
             return $ProductInfo;
-        }else{
+        } else {
             return null;
         }
     }
 
-    public function getImages($idProduct){
-        $ImageProduct = ImageProducts::WHERE('idProduct','=',$idProduct)->SELECT('id','imageproduct','idProduct')->get();
+    public function getImages($idProduct)
+    {
+        $ImageProduct = ImageProducts::WHERE('idProduct', '=', $idProduct)->SELECT('id', 'imageproduct',
+            'idProduct')->get();
         return $ImageProduct;
     }
 
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Products::class;
+        return Products::class;
     }
 }
 

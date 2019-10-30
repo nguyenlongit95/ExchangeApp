@@ -4,10 +4,13 @@
  * Class này sẽ extends EloquentRepository và Implements xxxRepositoryInterface
  * */
 namespace App\Repositories\Widgets;
+
 use App\Orders;
 use App\Repositories\Eloquent\EloquentRepository;
+use App\Widgets;
 
-class WidgetsEloquentRepository extends EloquentRepository implements WidgetsReporitoryInterface{
+class WidgetsEloquentRepository extends EloquentRepository implements WidgetsReporitoryInterface
+{
     /*
      * Tại đây ta sẽ khai báo chi tiết các phương thức đặc biệt
      * Ta khai báo chi tiết cho phương thức getModel
@@ -16,7 +19,7 @@ class WidgetsEloquentRepository extends EloquentRepository implements WidgetsRep
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Widgets::class;
+        return Widgets::class;
     }
 }
 

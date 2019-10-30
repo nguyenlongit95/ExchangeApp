@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\OrdersDetails;
 
-interface OrderDetilasRepositoryInterface{
+interface OrderDetilasRepositoryInterface
+{
     /*
      * Khai báo các phương thức đặc biệt, riêng biệt của mỗi đối tượng
      * Ở đây với Categories thì không có gì khác biệt nên ta không khai báo gì thêm

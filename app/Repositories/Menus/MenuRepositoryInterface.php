@@ -2,7 +2,8 @@
 
 namespace App\Repositories\Menus;
 
-interface MenuRepositoryInterface{
+interface MenuRepositoryInterface
+{
     public function updateChild();
 }
 

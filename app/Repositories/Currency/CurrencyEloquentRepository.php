@@ -5,16 +5,18 @@
  * */
 namespace App\Repositories\Currency;
 
+use App\Currency;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 use App\Contacts;
 
-class CurrencyEloquentRepository extends EloquentRepository implements CurrencyRepositoryInterface{
+class CurrencyEloquentRepository extends EloquentRepository implements CurrencyRepositoryInterface
+{
 
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Currency::class;
+        return Currency::class;
     }
 }
 

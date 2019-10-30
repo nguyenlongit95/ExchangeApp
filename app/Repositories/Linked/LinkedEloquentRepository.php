@@ -5,16 +5,18 @@
  * */
 namespace App\Repositories\Linked;
 
+use App\Linkeds;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 
-class LinkedEloquentRepository extends EloquentRepository implements LinkedRepositoryInterface {
+class LinkedEloquentRepository extends EloquentRepository implements LinkedRepositoryInterface
+{
 
 
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Linkeds::class;
+        return Linkeds::class;
     }
 }
 

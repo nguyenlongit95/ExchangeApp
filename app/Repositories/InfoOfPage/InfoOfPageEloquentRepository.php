@@ -5,16 +5,18 @@
  * */
 namespace App\Repositories\InfoOfPage;
 
+use App\InfoOfPages;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 use App\Contacts;
 
-class InfoOfPageEloquentRepository extends EloquentRepository implements InfoOfPageRepositoryInterface {
+class InfoOfPageEloquentRepository extends EloquentRepository implements InfoOfPageRepositoryInterface
+{
 
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\InfoOfPages::class;
+        return InfoOfPages::class;
     }
 }
 

@@ -20,4 +20,5 @@ interface CustomPropertiesRepositoryInterface
 
     public function addAttributeProduct($data, $AttributeValue);
 }
+
 ?>

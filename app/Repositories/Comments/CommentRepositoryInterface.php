@@ -6,12 +6,17 @@
  * */
 namespace App\Repositories\Comments;
 
-interface CommentRepositoryInterface{
+interface CommentRepositoryInterface
+{
     public function getParent_id($id);
+
     public function getReply($id);
+
     public function getIdBlog($id);
+
     public function getIdUser($id);
-    public function updateState($id,$State);
+
+    public function updateState($id, $State);
 }
 
 ?>

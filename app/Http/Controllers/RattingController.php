@@ -13,8 +13,10 @@ class RattingController extends Controller
     protected $RattingRepositories;
     protected $ProductRepositories;
 
-    public function __construct(SeoRepositoryInterface $rattingsReporitory, ProductRepositoryInterface $productReporitory)
-    {
+    public function __construct(
+        SeoRepositoryInterface $rattingsReporitory,
+        ProductRepositoryInterface $productReporitory
+    ) {
         $this->RattingRepositories = $rattingsReporitory;
         $this->ProductRepositories = $productReporitory;
     }
@@ -26,38 +28,43 @@ class RattingController extends Controller
      * update
      * delete
      * */
-    public function index(){
+    public function index()
+    {
         $Rattings = $this->RattingRepositories->getAll(30);
-        return view("admin.Sliders.index",compact('Rattings'));
+        return view("admin.Sliders.index", compact('Rattings'));
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $Ratting = $this->RattingRepositories->find($id);
         return $Ratting;
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $properties = $request->all(10000);
-        $Rattings = $this->RattingRepositories->update($properties,$id);
-        if($Rattings == true){
-            return redirect()->back()->with('thong_bao','Update ratting success');
-        }else{
-            return redirect()->back()->with('thong_bao','Update ratting failed');
+        $Rattings = $this->RattingRepositories->update($properties, $id);
+        if ($Rattings == true) {
+            return redirect()->back()->with('thong_bao', 'Update ratting success');
+        } else {
+            return redirect()->back()->with('thong_bao', 'Update ratting failed');
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $Ratting = $this->RattingRepositories->delete($id);
-        if($Ratting == true){
-            return redirect()->back()->with('thong_bao','Delete ratting success');
-        }else{
-            return redirect()->back()->with('thong_bao','Delete ratting failed');
+        if ($Ratting == true) {
+            return redirect()->back()->with('thong_bao', 'Delete ratting success');
+        } else {
+            return redirect()->back()->with('thong_bao', 'Delete ratting failed');
         }
     }
 
-    public function getUpdateRatting($id){
+    public function getUpdateRatting($id)
+    {
         $Ratting = $this->show($id);
         $Product = $this->ProductRepositories->getAll(10000);
-        return view("admin.Sliders.update",compact('Ratting','Product'));
+        return view("admin.Sliders.update", compact('Ratting', 'Product'));
     }
 }

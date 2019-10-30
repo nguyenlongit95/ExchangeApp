@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Widgets;
 
-interface WidgetsRepositoryInterface{
+interface WidgetsRepositoryInterface
+{
     /*
      * Tại đây khai báo các phương thức để quản lý widgets
      * Widgets sẽ là các thành phần cơ bản của website như:
