@@ -26,5 +26,19 @@ Route::group(['middleware'=>'auth:api'], function(){
 });
 
 Route::group(['prefix'=>'v1', 'namespace'=>$namespace], function() {
+    //
     Route::get('get-exchange', 'ExchangeController@index');
+    Route::get('get-exchange/{bank_code}', 'ExchangeController@show');
+
+    Route::get('get-currency', 'ExchangeController@getCurrency');
+    Route::get('get-currency/{currency}', 'ExchangeController@edit');
+
+    Route::get('get-gold-exchange', 'GoldController@index');
+    Route::get('get-gold-exchange/{currency}', 'GoldController@show');
+    Route::get('get-gold-exchange-world', 'GoldController@world');
+
+    Route::get('get-interest-rate', 'InterestRateController@index');
+
+    Route::get('get-virtual-money', 'VirtrualMoneyRateController@index');
+    Route::get('get-virtual-money/{slug}', 'VirtrualMoneyRateController@show');
 });

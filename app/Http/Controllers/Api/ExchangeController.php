@@ -25,15 +25,22 @@ class ExchangeController extends Controller
      */
     public function index()
     {
-        // Get Bank and Currency
         $bankInfo = BankInfo::where('active', 1)->orderBy('sort', 'ASC')->get();
         if (!$bankInfo) {
             return response()->json(["message" => "Cannot find the bank"], 422);
         }
-        // Ngoai Te Cron
-        $ngoaiTeCron = NgoaiTeCron::where('cronkey','!=', null)->orderBy('id', 'DESC')->first();
 
-        $ngoaiTe = NgoaiTe::where('cron_id', $ngoaiTeCron->id)->where('default', 0)->orderBy('id', 'DESC')->get();
+        $ngoaiTeCron = NgoaiTeCron::where('cronkey','!=', null)->orderBy('id', 'DESC')->first();
+        if (!$ngoaiTeCron) {
+            return response()->json(["message" => "Cannot find exchanges cron jobs"], 403);
+        }
+        $ngoaiTe = NgoaiTe::where('cron_id', $ngoaiTeCron->id)->where('default', 0)->orderBy('id', 'DESC')
+            ->select(
+                'id','code','bank_id',
+                'bank_code', 'time',
+                'muatienmat','muatienmat_diff','bantienmat','bantienmat_diff',
+                'muachuyenkhoan','muachuyenkhoan_diff','banchuyenkhoan','banchuyenkhoan_diff'
+            )->get();
         if (!$ngoaiTe) {
             return response(["message" => "Data not found"], 403);
         }
@@ -69,23 +76,85 @@ class ExchangeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int  $bankCode
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $bankCode)
     {
-        //
+        $bankInfo = BankInfo::where('bankcode', $bankCode)->where('active', 1)->first();
+        if (!$bankInfo) {
+            return response()->json(["message" => "Cannot find the bank"], 403);
+        }
+        $ngoaiTeCron = NgoaiTeCron::where('cronkey','!=', null)->orderBy('id', 'DESC')->first();
+        $ngoaiTe = NgoaiTe::where('cron_id', $ngoaiTeCron->id)
+            ->where('bank_code', $bankInfo->bankcode)->where('default', 0)->orderBy('id', 'DESC')
+            ->select(
+                'id','code','bank_id',
+                'bank_code', 'time',
+                'muatienmat','muatienmat_diff','bantienmat','bantienmat_diff',
+                'muachuyenkhoan','muachuyenkhoan_diff','banchuyenkhoan','banchuyenkhoan_diff'
+            )->get();
+        if (!$ngoaiTe) {
+            return response()->json(["message" => "Currency not found"], 403);
+        }
+        $mergeData = $this->exchange->mergeExchangeOfBank($bankInfo, $ngoaiTe);
+
+        return response()->json($mergeData, 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param $currency
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($currency)
     {
-        //
+        $cron = NgoaiTeCron::where('cronkey', '!=', null)->orderBy('id', 'DESC')->first();
+        if (!$cron) {
+            return response()->json(["message" => "cannot find cron job"], 403);
+        }
+        $exchanges = NgoaiTe::where('cron_id', $cron->id)->where('default', 0)
+            ->where('code', $currency)
+            ->orderBy('id', 'DESC')->select( 'id',
+                'code','bank_id','bank_code',
+                'symbol','ename','vname',
+                'muatienmat','muatienmat_diff','bantienmat','bantienmat_diff',
+                'muachuyenkhoan','muachuyenkhoan_diff','banchuyenkhoan','banchuyenkhoan_diff'
+            )->get();
+        if (!$exchanges) {
+            return response()->json(["message" => "Data not found"], 403);
+        }
+
+        return response()->json($exchanges, 200);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $currency
+     * @return \Illuminate\Http\Response
+     */
+    public function getCurrency()
+    {
+        $exchangeCron = NgoaiTeCron::orderBy('id', 'DESC')->first();
+        if (!$exchangeCron) {
+            return response()->json(["message" => "Cannot find cron job"], 403);
+        }
+
+        $exchanges = NgoaiTe::where('cron_id', $exchangeCron->id)->where('default', 0)
+            ->where('code', 'USD')
+            ->orderBy('id', 'DESC')->select( 'id',
+                'code','bank_id','bank_code',
+                'symbol','ename','vname',
+                'muatienmat','muatienmat_diff','bantienmat','bantienmat_diff',
+                'muachuyenkhoan','muachuyenkhoan_diff','banchuyenkhoan','banchuyenkhoan_diff'
+            )->get();
+        if (!$exchanges) {
+            return response()->json(["message" => "Data not found"], 403);
+        }
+
+        return response()->json($exchanges, 200);
     }
 
     /**

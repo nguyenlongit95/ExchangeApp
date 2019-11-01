@@ -104,8 +104,8 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Seo\SeoEloquentRepository::class
         );
         $this->app->bind(
-            \App\Repositories\Email\ExchangeRepositoryInterface::class,
-            \App\Repositories\Email\ExchangeEloquentRepository::class
+            \App\Repositories\Exchanges\ExchangeRepositoryInterface::class,
+            \App\Repositories\Exchanges\ExchangeEloquentRepository::class
         );
         $this->app->bind(
             \App\Repositories\Email\CurrencyRepositoryInterface::class,
@@ -119,8 +119,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Factory\Paygates\PaygateFactory::class
         );
         $this->app->bind(
-            \App\Repositories\Exchanges\ExchangeRepositoryInterface::class,
-            \App\Repositories\Exchanges\ExchangeEloquentRepository::class
+            \App\Repositories\GoldExchanges\GoldExchangeRepositoryInterface::class,
+            \App\Repositories\GoldExchanges\VirtualMoneyEloquentRepository::class
+        );
+        $this->app->bind(
+            \App\Repositories\InterestRate\InterestRateRepositoryInterface::class,
+            \App\Repositories\InterestRate\InterestRateEloquentRepository::class
+        );
+        $this->app->bind(
+            \App\Repositories\VirtualMoney\VirtualMoneyRepositoryInterface::class,
+            \App\Repositories\VirtualMoney\VirtualMoneyEloquentRepository::class
         );
     }
 }

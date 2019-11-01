@@ -6,8 +6,10 @@
  * */
 namespace App\Repositories\Email;
 
-interface EmailRepositoryInterface{
+interface EmailRepositoryInterface
+{
     public function configEmail($id, $State);
+
     public function sendMail($from_email, $from_name);
 }
 

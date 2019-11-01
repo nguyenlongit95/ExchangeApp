@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Blogs;
 
-interface BlogRepositoryInterface{
+interface BlogRepositoryInterface
+{
     /*
      * Khai báo các phương thức đặc biệt, riêng biệt của mỗi đối tượng
      * Ở đây với Categories thì không có gì khác biệt nên ta không khai báo gì thêm
@@ -21,7 +22,7 @@ interface BlogRepositoryInterface{
 
     public function deleteImageBlog($id);
 
-    public function insertImage($id,$Image);
+    public function insertImage($id, $Image);
 
     public function createSlug($title);
 }

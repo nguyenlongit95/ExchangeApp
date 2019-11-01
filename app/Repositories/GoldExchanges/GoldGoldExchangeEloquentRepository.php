@@ -3,21 +3,22 @@
  * Tại đây ta khai báo các phương thức cụ thể cho đối tượng
  * Class này sẽ extends EloquentRepository và Implements CateogryRepositoryInterface
  * */
-namespace App\Repositories\Linked;
+namespace App\Repositories\GoldExchanges;
 
-use App\Linkeds;
+use App\Models\GiaVang;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
+use App\Email;
+use Mail;
+use DB;
+use App\Models\NgoaiTe;
 
-class LinkedEloquentRepository extends EloquentRepository implements LinkedRepositoryInterface
+class GoldGoldExchangeEloquentRepository extends EloquentRepository implements GoldExchangeRepositoryInterface
 {
-
-
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return Linkeds::class;
+        return GiaVang::class;
     }
 }
 
-?>

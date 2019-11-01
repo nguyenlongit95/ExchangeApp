@@ -10,7 +10,8 @@ use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 use App\Repositories\CategoryBlogs\CategoryBlogRepositoryInterface;
 
-class CateoryEloquentRepository extends EloquentRepository implements CategoryBlogRepositoryInterface{
+class CateoryEloquentRepository extends EloquentRepository implements CategoryBlogRepositoryInterface
+{
     /*
      * Tại đây ta sẽ khai báo chi tiết các phương thức đặc biệt
      * Ta khai báo chi tiết cho phương thức getModel
@@ -26,6 +27,7 @@ class CateoryEloquentRepository extends EloquentRepository implements CategoryBl
         )->get();
         return $getParentID;
     }
+
     // Thực hiện chi tiết phương thức getInfo
     public function getInfo()
     {
@@ -39,7 +41,7 @@ class CateoryEloquentRepository extends EloquentRepository implements CategoryBl
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\CategoriesBlog::class;
+        return CategoriesBlog::class;
     }
 }
 

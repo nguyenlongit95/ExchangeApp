@@ -4,10 +4,12 @@
  * Class này sẽ extends EloquentRepository và Implements xxxRepositoryInterface
  * */
 namespace App\Repositories\Rattings;
+
 use App\Repositories\Eloquent\EloquentRepository;
 use App\Rattings;
 
-class RattingsEloquentRepository extends EloquentRepository implements RattingsRepositoryInterface {
+class RattingsEloquentRepository extends EloquentRepository implements RattingsRepositoryInterface
+{
     /*
      * Tại đây ta sẽ khai báo chi tiết các phương thức đặc biệt
      * Ta khai báo chi tiết cho phương thức getModel
@@ -33,7 +35,9 @@ class RattingsEloquentRepository extends EloquentRepository implements RattingsR
         )->paginate(5);
         return $RattingProduct;
     }
-    public function getStarAVG($idProduct){
+
+    public function getStarAVG($idProduct)
+    {
         /*
          * Trung bình số sao của 1 sản phẩm
          * Làm tròn đến hàng đơn vị
@@ -49,7 +53,7 @@ class RattingsEloquentRepository extends EloquentRepository implements RattingsR
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Rattings::class;
+        return Rattings::class;
     }
 }
 

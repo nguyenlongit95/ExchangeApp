@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Products;
 
-interface ProductRepositoryInterface{
+interface ProductRepositoryInterface
+{
     /*
      * Khai báo các phương thức có đặc điểm riêng của từng Products
      * thêm hình ảnh mới

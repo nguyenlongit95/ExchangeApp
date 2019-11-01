@@ -4,13 +4,10 @@
  * Các phương thức khai báo ở đây sẽ không có trong EloquentRepository
  * Các phương thức khai báo ở đây chỉ có tác dụng trong module CategoryProducts
  * */
-namespace App\Repositories\Exchanges;
+namespace App\Repositories\GoldExchanges;
 
-interface ExchangeRepositoryInterface
+interface GoldExchangeRepositoryInterface
 {
-    public function mergeExchange($bankInfo, $exchange);
 
-    public function mergeExchangeOfBank($bankInfo, $exchanges);
 }
 
-?>

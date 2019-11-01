@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Seo;
 
-interface SeoRepositoryInterface{
+interface SeoRepositoryInterface
+{
     /**
      * Kiểm tra link
      * Sinh ra mã md5 của link

@@ -10,9 +10,11 @@ use App\Comments;
 use App\Repositories\Eloquent;
 use App\Repositories\Eloquent\EloquentRepository;
 
-class CommentEloquentRepository extends EloquentRepository implements CommentRepositoryInterface{
+class CommentEloquentRepository extends EloquentRepository implements CommentRepositoryInterface
+{
 
-    public function getParent_id($id){
+    public function getParent_id($id)
+    {
         $Comment = Comments::findOrFail($id)->SELECT("Parent_id")->get();
         return $Comment;
     }
@@ -42,25 +44,29 @@ class CommentEloquentRepository extends EloquentRepository implements CommentRep
         $Comment = Comments::findOrFail($id)->select("idBlog")->first();
         return $Comment;
     }
+
     public function getIdUser($id)
     {
         // TODO: Implement getIdUser() method.
         $Comment = Comments::findOrFail($id)->select("idUser")->first();
         return $Comment;
     }
-    public function updateState($id,$State){
+
+    public function updateState($id, $State)
+    {
         $Comment = Comments::findOrFail($id);
         $Comment->state = $State;
-        if($Comment->update()){
+        if ($Comment->update()) {
             return 1;
-        }else{
+        } else {
             return 0;
         }
     }
+
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Comments::class;
+        return Comments::class;
     }
 }
 

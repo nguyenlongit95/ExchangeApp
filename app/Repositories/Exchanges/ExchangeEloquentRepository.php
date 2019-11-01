@@ -11,7 +11,9 @@ use App\Email;
 use Mail;
 use DB;
 use App\Models\NgoaiTe;
-class ExchangeEloquentRepository extends EloquentRepository implements ExchangeRepositoryInterface{
+
+class ExchangeEloquentRepository extends EloquentRepository implements ExchangeRepositoryInterface
+{
 
     /**
      * merge this exchanges
@@ -23,7 +25,7 @@ class ExchangeEloquentRepository extends EloquentRepository implements ExchangeR
     {
         foreach ($ngoaiTe as $ngoaite) {
             if (!$ngoaite->bank_id) {
-               continue;
+                continue;
             }
             foreach ($bankInfo as $bank) {
                 if ($bank->id == $ngoaite->bank_id) {
@@ -37,10 +39,23 @@ class ExchangeEloquentRepository extends EloquentRepository implements ExchangeR
         return $ngoaiTe;
     }
 
+    public function mergeExchangeOfBank($bankInfo, $exchanges)
+    {
+        foreach ($exchanges as $exchange) {
+            if ($exchange->bank_id == $bankInfo->id) {
+                $exchange->bank_name = $bankInfo->bankname;
+                $exchange->bank_code = $bankInfo->bankcode;
+            } else {
+                continue;
+            }
+        }
+        return $exchanges;
+    }
+
     public function getModel()
     {
         // TODO: Implement getModel() method.
-        return \App\Models\NgoaiTe::class;
+        return NgoaiTe::class;
     }
 }
 

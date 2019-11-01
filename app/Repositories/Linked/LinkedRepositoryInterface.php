@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Linked;
 
-interface LinkedRepositoryInterface{
+interface LinkedRepositoryInterface
+{
 }
 
 ?>

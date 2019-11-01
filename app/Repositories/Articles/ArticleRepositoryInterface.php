@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Articles;
 
-interface ArticleRepositoryInterface{
+interface ArticleRepositoryInterface
+{
     /*
      * Tại đây khai báo các phương thức riêng của bài báo(Articles)
      * */

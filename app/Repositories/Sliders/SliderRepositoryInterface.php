@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Sliders;
 
-interface SliderRepositoryInterface{
+interface SliderRepositoryInterface
+{
 
 }
 

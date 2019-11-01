@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\ImageProduct;
 
-interface ImageProductRepositoryInterface{
+interface ImageProductRepositoryInterface
+{
     /*
      * Khai báo các phương thức có đặc điểm riêng của từng Products
      * Update hình ảnh
@@ -14,11 +15,13 @@ interface ImageProductRepositoryInterface{
      * Lấy thông tin hình ảnh
      * Thay đổi kích cỡ hình ảnh
     */
-    public function getImages($idProduct,$numberPaginate);
+    public function getImages($idProduct, $numberPaginate);
 
     public function ResizeImage($id);
+
     // $id lay vao tham so id cua san pham
     public function addImage($Image, $id);
+
     // $id se lay vao id cua hinh anh
     public function deleteImage($id);
 }

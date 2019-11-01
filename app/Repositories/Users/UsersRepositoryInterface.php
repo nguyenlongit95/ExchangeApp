@@ -6,7 +6,8 @@
  * */
 namespace App\Repositories\Users;
 
-interface UsersRepositoryInterface{
+interface UsersRepositoryInterface
+{
     /*
      * Khai báo các phương thức đặc biệt, riêng biệt của mỗi đối tượng
      * Ở đây với Categories thì không có gì khác biệt nên ta không khai báo gì thêm

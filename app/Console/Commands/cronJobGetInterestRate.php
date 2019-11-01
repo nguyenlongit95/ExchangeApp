@@ -314,11 +314,12 @@ class cronJobGetInterestRate extends Command
                 $LaiSuat->bank_name = 'DongA';
                 $LaiSuat->hinhthuctietkiem = 1;
                 $LaiSuat->kyhan = strip_tags($rows[$i]->find('td',0)->innertext);
-                if(str_replace('-ngay','',str_replace('-thang','',$changeText->changeTitle(strip_tags($rows[$i]->find("td",0)))))){
-                    $LaiSuat->kyhanslug = 0;
-                }else{
-                    $LaiSuat->kyhanslug = str_replace('0','',str_replace('-ngay','',str_replace('-thang','',$changeText->changeTitle(strip_tags($rows[$i]->find("td",0))))));
+
+                $kyhanSlugTemp =explode(' ', strip_tags($rows[$i]->find('td',0)->innertext));
+                if ($kyhanSlugTemp[1] === 'tuần') {
+                    continue;
                 }
+                $LaiSuat->kyhanslug = $kyhanSlugTemp[0];
                 $LaiSuat->moctiengui = null;
                 $LaiSuat->moctienguisau = null;
                 if($rows[$i]->find('td',1) == null || $rows[$i]->find('td',1) == ""){
@@ -369,8 +370,8 @@ class cronJobGetInterestRate extends Command
                     $LaiSuat->bank_code = 'ocean';
                     $LaiSuat->bank_name = 'OceanBank';
                     $LaiSuat->hinhthuctietkiem = 1;
-                    $LaiSuat->kyhan = strip_tags($this->changeTxtOCB($table[$i]->find('tr td', $j - 2)->innertext));
-                    $kyhanslug = html_entity_decode(str_replace('-ngay','',str_replace('-thang','',$changeText->changeTitle(strip_tags($this->changeTxtOCB($table[$i]->find('tr td', $j - 2)->innertext))))));
+                    $LaiSuat->kyhan = $table[$i]->find('tr td', $j - 2);
+                    $kyhanslug = rand(1, 36);
                     if($kyhanslug === "tgtt-tkkkh"){
                         $kyhanslug = 0;
                     }
@@ -378,10 +379,10 @@ class cronJobGetInterestRate extends Command
                     $LaiSuat->moctiengui = null;
                     $LaiSuat->moctienguisau = null;
                     $LaiSuat->laisuat_vnd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j - 1)->innertext)));
-                    $LaiSuat->laisuat_usd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j)->innertext)));
-                    $LaiSuat->laisuat_eur = null;
-                    $LaiSuat->laisuattratruoc = null;
-                    $LaiSuat->laisuathangthang = null;
+//                    $LaiSuat->laisuat_usd = floatval(str_replace(',', '.', strip_tags($table[$i]->find('tr td', $j)->innertext)));
+//                    $LaiSuat->laisuat_eur = null;
+//                    $LaiSuat->laisuattratruoc = null;
+//                    $LaiSuat->laisuathangthang = null;
                     $LaiSuat->save();
                 }
 
