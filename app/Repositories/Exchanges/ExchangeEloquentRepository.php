@@ -31,6 +31,14 @@ class ExchangeEloquentRepository extends EloquentRepository implements ExchangeR
                 if ($bank->id == $ngoaite->bank_id) {
                     $ngoaite->bank_name = $bank->bankname;
                     $ngoaite->bank_code = $bank->bankcode;
+                    $ngoaite->muatienmat = number_format($ngoaite->muatienmat, 0);
+                    $ngoaite->muatienmat_diff = number_format($ngoaite->muatienmat_diff, 0);
+                    $ngoaite->bantienmat = number_format($ngoaite->bantienmat, 0);
+                    $ngoaite->bantienmat_diff = number_format($ngoaite->bantienmat_diff, 0);
+                    $ngoaite->muachuyenkhoan = number_format($ngoaite->muachuyenkhoan, 0);
+                    $ngoaite->muachuyenkhoan_diff = number_format($ngoaite->muachuyenkhoan_diff, 0);
+                    $ngoaite->banchuyenkhoan = number_format($ngoaite->banchuyenkhoan, 0);
+                    $ngoaite->banchuyenkhoan_diff = number_format($ngoaite->banchuyenkhoan_diff, 0);
                 } else {
                     continue;
                 }
@@ -45,6 +53,14 @@ class ExchangeEloquentRepository extends EloquentRepository implements ExchangeR
             if ($exchange->bank_id == $bankInfo->id) {
                 $exchange->bank_name = $bankInfo->bankname;
                 $exchange->bank_code = $bankInfo->bankcode;
+                $exchange->muatienmat = number_format($exchange->muatienmat, 0);
+                $exchange->muatienmat_diff = number_format($exchange->muatienmat_diff, 0);
+                $exchange->bantienmat = number_format($exchange->bantienmat, 0);
+                $exchange->bantienmat_diff = number_format($exchange->bantienmat_diff, 0);
+                $exchange->muachuyenkhoan = number_format($exchange->muachuyenkhoan, 0);
+                $exchange->muachuyenkhoan_diff = number_format($exchange->muachuyenkhoan_diff, 0);
+                $exchange->banchuyenkhoan = number_format($exchange->banchuyenkhoan, 0);
+                $exchange->banchuyenkhoan_diff = number_format($exchange->banchuyenkhoan_diff, 0);
             } else {
                 continue;
             }
