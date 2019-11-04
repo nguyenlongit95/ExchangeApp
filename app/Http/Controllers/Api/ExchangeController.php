@@ -8,14 +8,16 @@ use App\Models\NgoaiTeCron;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\Exchanges\ExchangeRepositoryInterface;
+use App\Helpers\ResponseAPI;
 
 class ExchangeController extends Controller
 {
     private $exchange;
-
+    private $responseAPI;
     public function __construct(ExchangeRepositoryInterface $exchange)
     {
         $this->exchange = $exchange;
+        $this->responseAPI = new ResponseAPI();
     }
 
     /**
@@ -42,7 +44,7 @@ class ExchangeController extends Controller
                 'muachuyenkhoan','muachuyenkhoan_diff','banchuyenkhoan','banchuyenkhoan_diff'
             )->get();
         if (!$ngoaiTe) {
-            return response(["message" => "Data not found"], 403);
+            return response($this->responseAPI->responseAPI(array()));
         }
         $mergeData = $this->exchange->mergeExchange($bankInfo, $ngoaiTe);
         if (!$mergeData) {
